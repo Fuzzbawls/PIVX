@@ -1283,7 +1283,8 @@ void ThreadDNSAddressSeed()
         } else {
             std::vector<CNetAddr> vIPs;
             std::vector<CAddress> vAdd;
-            if (LookupHost(seed.host.c_str(), vIPs, 0, true)) {
+            uint64_t requiredServiceBits = NODE_NETWORK;
+            if (LookupHost(seed.getHost(requiredServiceBits).c_str(), vIPs, 0, true)) {
                 for (CNetAddr& ip : vIPs) {
                     int nOneDay = 24 * 3600;
                     CAddress addr = CAddress(CService(ip, Params().GetDefaultPort()));
