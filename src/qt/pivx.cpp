@@ -195,7 +195,7 @@ public:
     void createSplashScreen(const NetworkStyle* networkStyle);
 
     /// Create tutorial screen
-    bool createTutorialScreen();
+    bool createTutorialScreen(const NetworkStyle* networkStyle);
 
     /// Request core initialization
     void requestInitialize();
@@ -373,9 +373,9 @@ void BitcoinApplication::createSplashScreen(const NetworkStyle* networkStyle)
     connect(this, SIGNAL(splashFinished(QWidget*)), splash, SLOT(slotFinish(QWidget*)));
 }
 
-bool BitcoinApplication::createTutorialScreen()
+bool BitcoinApplication::createTutorialScreen(const NetworkStyle* networkStyle)
 {
-    WelcomeContentWidget* widget = new WelcomeContentWidget();
+    WelcomeContentWidget* widget = new WelcomeContentWidget(0, networkStyle);
 
     connect(widget, &WelcomeContentWidget::onLanguageSelected, [this](){
         updateTranslation();
@@ -663,7 +663,7 @@ int main(int argc, char* argv[])
     boost::filesystem::path pathBootstrap = GetDataDir() / strWalletFile;
     if (!boost::filesystem::exists(pathBootstrap)) {
         // wallet doesn't exist, popup tutorial screen.
-        ret = app.createTutorialScreen();
+        ret = app.createTutorialScreen(networkStyle.data());
     }
 #endif
     if(!ret){

@@ -3,17 +3,22 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "qt/pivx/welcomecontentwidget.h"
-#include "qt/pivx/forms/ui_welcomecontentwidget.h"
+
+#include "guiutil.h"
+#include "networkstyle.h"
+
+#include <QDesktopWidget>
+#include <QDir>
 #include <QFile>
 #include <QListView>
-#include <QDir>
-#include "guiutil.h"
 #include <QSettings>
-#include <iostream>
-#include <QDesktopWidget>
 
-WelcomeContentWidget::WelcomeContentWidget(QWidget *parent) :
-    QDialog(parent, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint),
+#include <iostream>
+
+#include "qt/pivx/forms/ui_welcomecontentwidget.h"
+
+WelcomeContentWidget::WelcomeContentWidget(Qt::WindowFlags f, const NetworkStyle* networkStyle) :
+    QDialog(0, f),
     ui(new Ui::WelcomeContentWidget),
     backButton(new QPushButton()),
     icConfirm1(new QPushButton()),
@@ -24,6 +29,12 @@ WelcomeContentWidget::WelcomeContentWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QString titleText = tr("PIVX Core");
+    QString titleAddText = networkStyle->getTitleAddText();
+    setWindowTitle(titleText + " " + titleAddText);
+#ifndef Q_OS_MAC
+    setWindowIcon(networkStyle->getAppIcon());
+#endif
     this->setStyleSheet(GUIUtil::loadStyleSheet());
 
     ui->frame->setProperty("cssClass", "container-welcome-stack");
