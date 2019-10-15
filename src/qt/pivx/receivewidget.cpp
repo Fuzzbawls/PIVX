@@ -92,15 +92,15 @@ ReceiveWidget::ReceiveWidget(PIVXGUI* parent) :
     ui->listViewAddress->setVisible(false);
 
     // Connect
-    connect(ui->pushButtonLabel, SIGNAL(clicked()), this, SLOT(onLabelClicked()));
-    connect(ui->pushButtonCopy, SIGNAL(clicked()), this, SLOT(onCopyClicked()));
-    connect(ui->pushButtonNewAddress, SIGNAL(clicked()), this, SLOT(onNewAddressClicked()));
-    connect(ui->listViewAddress, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAddressClicked(QModelIndex)));
-    connect(ui->btnRequest, SIGNAL(clicked()), this, SLOT(onRequestClicked()));
-    connect(ui->btnMyAddresses, SIGNAL(clicked()), this, SLOT(onMyAddressesClicked()));
+    connect(ui->pushButtonLabel, &QPushButton::clicked, this, &ReceiveWidget::onLabelClicked);
+    connect(ui->pushButtonCopy, &QPushButton::clicked, this, &ReceiveWidget::onCopyClicked);
+    connect(ui->pushButtonNewAddress, &QPushButton::clicked, this, &ReceiveWidget::onNewAddressClicked);
+    connect(ui->listViewAddress, &QListView::clicked, this, &ReceiveWidget::handleAddressClicked);
+    connect(ui->btnRequest, &OptionButton::clicked, this, &ReceiveWidget::onRequestClicked);
+    connect(ui->btnMyAddresses, &OptionButton::clicked, this, &ReceiveWidget::onMyAddressesClicked);
 }
 
-void ReceiveWidget::loadWalletModel(){
+void ReceiveWidget::loadWalletModel() {
     if(walletModel) {
         this->addressTableModel = walletModel->getAddressTableModel();
         this->filter = new AddressFilterProxyModel(AddressTableModel::Receive, this);
@@ -112,7 +112,7 @@ void ReceiveWidget::loadWalletModel(){
         refreshView();
 
         // data change
-        connect(this->addressTableModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this, SLOT(refreshView(QModelIndex, QModelIndex)));
+        connect(this->addressTableModel, &AddressTableModel::dataChanged, this, &ReceiveWidget::refreshView);
     }
 }
 

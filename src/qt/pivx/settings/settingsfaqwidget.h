@@ -7,6 +7,8 @@
 
 #include <QDialog>
 
+class PIVXGUI;
+
 namespace Ui {
 class SettingsFaqWidget;
 }
@@ -16,13 +18,13 @@ class SettingsFaqWidget : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsFaqWidget(QWidget *parent = nullptr);
+    explicit SettingsFaqWidget(PIVXGUI* _window = nullptr, QWidget *parent = nullptr);
     ~SettingsFaqWidget();
 
     void showEvent(QShowEvent *event) override;
 
 public Q_SLOTS:
-   void windowResizeEvent(QResizeEvent* event);
+   void windowResizeEvent();
    void setSection(int num);
 private Q_SLOTS:
     void onFaq1Clicked();
@@ -38,6 +40,7 @@ private Q_SLOTS:
 private:
     Ui::SettingsFaqWidget *ui;
     int pos = 0;
+    PIVXGUI* window = nullptr;
 
     std::vector<QPushButton*> getButtons();
 };

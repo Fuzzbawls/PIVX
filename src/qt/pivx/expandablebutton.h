@@ -53,7 +53,7 @@ protected:
     virtual void leaveEvent(QEvent *);
 
     //virtual void mouseMoveEvent(QMouseEvent *ev);
-    virtual void mousePressEvent(QMouseEvent *ev);
+    //virtual void mousePressEvent(QMouseEvent *ev);
 
 private Q_SLOTS:
 

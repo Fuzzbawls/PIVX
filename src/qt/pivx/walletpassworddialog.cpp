@@ -96,9 +96,9 @@ WalletPasswordDialog::WalletPasswordDialog(QWidget *parent) :
     ui->btnSave->setText("ENCRYPT");
     ui->btnSave->setProperty("cssClass", "btn-primary");
 
-    connect(btnWatch, SIGNAL(clicked()), this, SLOT(onWatchClicked()));
-    connect(ui->btnEsc, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(btnWatch, &QCheckBox::clicked, this, &WalletPasswordDialog::onWatchClicked);
+    connect(ui->btnEsc, &QPushButton::clicked, this, &WalletPasswordDialog::close);
+    connect(ui->btnCancel, &QPushButton::clicked, this, &WalletPasswordDialog::close);
 }
 
 void WalletPasswordDialog::onWatchClicked(){

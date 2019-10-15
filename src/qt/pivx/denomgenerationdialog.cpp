@@ -61,8 +61,8 @@ DenomGenerationDialog::DenomGenerationDialog(QWidget *parent) :
     ui->btnSave->setText("SAVE");
     ui->btnSave->setProperty("cssClass", "btn-primary");
 
-    connect(ui->btnEsc, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->btnEsc, &QPushButton::clicked, this, &DenomGenerationDialog::close);
+    connect(ui->btnCancel, &QPushButton::clicked, this, &DenomGenerationDialog::close);
 }
 
 DenomGenerationDialog::~DenomGenerationDialog()
