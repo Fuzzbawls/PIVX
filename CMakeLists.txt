@@ -76,6 +76,10 @@ find_package(ZMQ)
 find_package(Miniupnp)
 find_package(Boost COMPONENTS system filesystem thread program_options REQUIRED)
 
+if(Boost_FOUND)
+    message(STATUS "Found Boost (${Boost_VERSION_STRING}): ${Boost_LIBRARIES}")
+endif()
+
 # run autogen.sh if missing header files from configure on Linux/Mac
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/configure")
 else()
