@@ -116,6 +116,15 @@ SendWidget::SendWidget(PIVXGUI* parent) :
 
     setCssProperty(ui->labelAmountRemaining, "text-body1");
 
+    setCssProperty(ui->labelCoinControlQuantity, "text-body1");
+    setCssProperty(ui->labelCoinControlAmount, "text-body1");
+    setCssProperty(ui->labelCoinControlFee, "text-body1");
+    setCssProperty(ui->labelCoinControlAfterFee, "text-body1");
+    setCssProperty(ui->labelCoinControlBytes, "text-body1");
+    setCssProperty(ui->labelCoinControlPriority, "text-body1");
+    setCssProperty(ui->labelCoinControlLowOutput, "text-body1");
+    setCssProperty(ui->labelCoinControlChange, "text-body1");
+
     // Icon Send
     ui->stackedWidget->addWidget(coinIcon);
     coinIcon->show();
@@ -140,6 +149,35 @@ SendWidget::SendWidget(PIVXGUI* parent) :
     connect(ui->pushButtonSave, SIGNAL(clicked()), this, SLOT(onSendClicked()));
     connect(ui->pushButtonAddRecipient, SIGNAL(clicked()), this, SLOT(onAddEntryClicked()));
     connect(ui->pushButtonClear, SIGNAL(clicked()), this, SLOT(clearAll()));
+
+    // Coin Control: clipboard actions
+    QAction* clipboardQuantityAction = new QAction(tr("Copy quantity"), this);
+    QAction* clipboardAmountAction = new QAction(tr("Copy amount"), this);
+    QAction* clipboardFeeAction = new QAction(tr("Copy fee"), this);
+    QAction* clipboardAfterFeeAction = new QAction(tr("Copy after fee"), this);
+    QAction* clipboardBytesAction = new QAction(tr("Copy bytes"), this);
+    QAction* clipboardPriorityAction = new QAction(tr("Copy priority"), this);
+    QAction* clipboardLowOutputAction = new QAction(tr("Copy dust"), this);
+    QAction* clipboardChangeAction = new QAction(tr("Copy change"), this);
+    QAction* clipboardRemainingAction = new QAction(tr("Copy remaining"), this);
+    connect(clipboardQuantityAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardQuantity()));
+    connect(clipboardAmountAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardAmount()));
+    connect(clipboardFeeAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardFee()));
+    connect(clipboardAfterFeeAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardAfterFee()));
+    connect(clipboardBytesAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardBytes()));
+    connect(clipboardPriorityAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardPriority()));
+    connect(clipboardLowOutputAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardLowOutput()));
+    connect(clipboardChangeAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardChange()));
+    connect(clipboardRemainingAction, SIGNAL(triggered()), this, SLOT(coinControlClipboardRemaining()));
+    ui->labelCoinControlQuantity->addAction(clipboardQuantityAction);
+    ui->labelCoinControlAmount->addAction(clipboardAmountAction);
+    ui->labelCoinControlFee->addAction(clipboardFeeAction);
+    ui->labelCoinControlAfterFee->addAction(clipboardAfterFeeAction);
+    ui->labelCoinControlBytes->addAction(clipboardBytesAction);
+    ui->labelCoinControlPriority->addAction(clipboardPriorityAction);
+    ui->labelCoinControlLowOutput->addAction(clipboardLowOutputAction);
+    ui->labelCoinControlChange->addAction(clipboardChangeAction);
+    ui->labelAmountRemaining->addAction(clipboardRemainingAction);
 }
 
 void SendWidget::refreshView(){
@@ -173,22 +211,31 @@ void SendWidget::refreshAmounts() {
     ui->labelAmountSend->setText(GUIUtil::formatBalance(total, nDisplayUnit, isZpiv));
 
     CAmount totalAmount = 0;
-    if (CoinControlDialog::coinControl->HasSelected()){
+    CAmount nFee = 0;
+    CoinControlDialog::payAmounts.clear();
+    for (SendMultiRow* entry : entries) {
+        if (entry)
+            CoinControlDialog::payAmounts.append(entry->getValue().amount);
+    }
+    if (CoinControlDialog::coinControl->HasSelected()) {
+        CoinControlDialog::updateLabels(walletModel, this);
+        nFee = GUIUtil::parseValue(ui->labelCoinControlFee->text().left(ui->labelCoinControlFee->text().indexOf(" ")).replace("~", ""), nDisplayUnit);
         // Set remaining balance to the sum of the coinControl selected inputs
-        totalAmount = walletModel->getBalance(CoinControlDialog::coinControl) - total;
+        totalAmount = walletModel->getBalance(CoinControlDialog::coinControl) - total - nFee;
         ui->labelTitleTotalRemaining->setText(tr("Total remaining from the selected UTXO"));
     } else {
         // Wallet's balance
-        totalAmount = (isZpiv ? walletModel->getZerocoinBalance() : walletModel->getBalance()) - total;
+        if (customFeeDialog && isCustomFeeSelected) {
+            nFee = customFeeDialog->getFeeRate().GetFeePerK();
+        } else {
+            CFeeRate feeRate = mempool.estimateFee(5);
+            nFee = (feeRate <= CFeeRate(0) ? CWallet::minTxFee.GetFeePerK() : feeRate.GetFeePerK());
+        }
+        totalAmount = (isZpiv ? walletModel->getZerocoinBalance() : walletModel->getBalance()) - total - nFee;
         ui->labelTitleTotalRemaining->setText(tr("Total remaining"));
     }
-    ui->labelAmountRemaining->setText(
-            GUIUtil::formatBalance(
-                    totalAmount,
-                    nDisplayUnit,
-                    isZpiv
-                    )
-    );
+    ui->labelAmountRemaining->setText(GUIUtil::formatBalance(totalAmount,nDisplayUnit, isZpiv));
+    ui->labelAmountRemainingValue->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, totalAmount));
 }
 
 void SendWidget::loadClientModel(){
@@ -224,6 +271,7 @@ void SendWidget::loadWalletModel() {
 void SendWidget::clearAll(){
     onResetCustomOptions(false);
     if(customFeeDialog) customFeeDialog->clear();
+    isCustomFeeSelected = false;
     ui->pushButtonFee->setText(tr("Customize Fee"));
     if(walletModel) walletModel->setWalletDefaultFee();
     clearEntries();
@@ -288,6 +336,7 @@ void SendWidget::onAddEntryClicked(){
         }
     }
     addEntry();
+    refreshAmounts();
 }
 
 void SendWidget::resizeEvent(QResizeEvent *event){
@@ -583,13 +632,14 @@ void SendWidget::onChangeCustomFeeClicked(){
         isCustomFeeSelected = false;
         walletModel->setWalletDefaultFee();
     }
+    refreshAmounts();
 }
 
 void SendWidget::onCoinControlClicked(){
     if(isPIV){
         if (walletModel->getBalance() > 0) {
             if (!coinControlDialog) {
-                coinControlDialog = new CoinControlDialog();
+                coinControlDialog = new CoinControlDialog(this);
                 coinControlDialog->setModel(walletModel);
             } else {
                 coinControlDialog->updateView();
@@ -788,6 +838,60 @@ void SendWidget::resizeMenu(){
 
 void SendWidget::changeTheme(bool isLightTheme, QString& theme){
     if (coinControlDialog) coinControlDialog->setStyleSheet(theme);
+}
+
+// Coin Control: copy label "Quantity" to clipboard
+void SendWidget::coinControlClipboardQuantity()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlQuantity->text());
+}
+
+// Coin Control: copy label "Amount" to clipboard
+void SendWidget::coinControlClipboardAmount()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlAmount->text().left(ui->labelCoinControlAmount->text().indexOf(" ")));
+}
+
+// Coin Control: copy label "Fee" to clipboard
+void SendWidget::coinControlClipboardFee()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlFee->text().left(ui->labelCoinControlFee->text().indexOf(" ")).replace("~", ""));
+}
+
+// Coin Control: copy label "After fee" to clipboard
+void SendWidget::coinControlClipboardAfterFee()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlAfterFee->text().left(ui->labelCoinControlAfterFee->text().indexOf(" ")).replace("~", ""));
+}
+
+// Coin Control: copy label "Bytes" to clipboard
+void SendWidget::coinControlClipboardBytes()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlBytes->text().replace("~", ""));
+}
+
+// Coin Control: copy label "Priority" to clipboard
+void SendWidget::coinControlClipboardPriority()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlPriority->text());
+}
+
+// Coin Control: copy label "Dust" to clipboard
+void SendWidget::coinControlClipboardLowOutput()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlLowOutput->text());
+}
+
+// Coin Control: copy label "Change" to clipboard
+void SendWidget::coinControlClipboardChange()
+{
+    GUIUtil::setClipboard(ui->labelCoinControlChange->text().left(ui->labelCoinControlChange->text().indexOf(" ")).replace("~", ""));
+}
+
+// Coin Control: copy label "Change" to clipboard
+void SendWidget::coinControlClipboardRemaining()
+{
+    GUIUtil::setClipboard(ui->labelAmountRemainingValue->text().left(ui->labelAmountRemainingValue->text().indexOf(" ")).replace("~", ""));
 }
 
 SendWidget::~SendWidget(){

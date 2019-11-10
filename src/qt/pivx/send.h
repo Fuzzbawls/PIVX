@@ -70,6 +70,15 @@ private slots:
     void onContactMultiClicked();
     void onDeleteClicked();
     void onResetCustomOptions(bool fRefreshAmounts);
+    void coinControlClipboardQuantity();
+    void coinControlClipboardAmount();
+    void coinControlClipboardFee();
+    void coinControlClipboardAfterFee();
+    void coinControlClipboardBytes();
+    void coinControlClipboardPriority();
+    void coinControlClipboardLowOutput();
+    void coinControlClipboardChange();
+    void coinControlClipboardRemaining();
 private:
     Ui::send *ui;
     QPushButton *coinIcon;

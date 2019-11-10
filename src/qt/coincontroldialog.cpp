@@ -136,7 +136,6 @@ CoinControlDialog::CoinControlDialog(QWidget* parent, bool fMultisigEnabled) : Q
     QAction* clipboardFeeAction = new QAction(tr("Copy fee"), this);
     QAction* clipboardAfterFeeAction = new QAction(tr("Copy after fee"), this);
     QAction* clipboardBytesAction = new QAction(tr("Copy bytes"), this);
-    QAction* clipboardPriorityAction = new QAction(tr("Copy priority"), this);
     QAction* clipboardLowOutputAction = new QAction(tr("Copy dust"), this);
     QAction* clipboardChangeAction = new QAction(tr("Copy change"), this);
 
@@ -145,7 +144,6 @@ CoinControlDialog::CoinControlDialog(QWidget* parent, bool fMultisigEnabled) : Q
     connect(clipboardFeeAction, SIGNAL(triggered()), this, SLOT(clipboardFee()));
     connect(clipboardAfterFeeAction, SIGNAL(triggered()), this, SLOT(clipboardAfterFee()));
     connect(clipboardBytesAction, SIGNAL(triggered()), this, SLOT(clipboardBytes()));
-    connect(clipboardPriorityAction, SIGNAL(triggered()), this, SLOT(clipboardPriority()));
     connect(clipboardLowOutputAction, SIGNAL(triggered()), this, SLOT(clipboardLowOutput()));
     connect(clipboardChangeAction, SIGNAL(triggered()), this, SLOT(clipboardChange()));
 
@@ -564,7 +562,7 @@ void CoinControlDialog::updateDialogLabels()
     }
 }
 
-void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
+void CoinControlDialog::updateLabels(WalletModel* model, QWidget* dialog)
 {
     if (!model)
         return;

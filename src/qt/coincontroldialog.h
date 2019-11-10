@@ -51,7 +51,7 @@ public:
     void updateView();
 
     // static because also called from sendcoinsdialog
-    static void updateLabels(WalletModel*, QDialog*);
+    static void updateLabels(WalletModel*, QWidget*);
     static QString getPriorityLabel(double dPriority, double mempoolEstimatePriority);
 
     static QList<CAmount> payAmounts;
