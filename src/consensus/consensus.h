@@ -20,9 +20,6 @@ static const unsigned int MAX_BLOCK_SIGOPS_LEGACY = MAX_BLOCK_SIZE_LEGACY / 50;
 static const unsigned int MAX_TX_SIGOPS_CURRENT = MAX_BLOCK_SIGOPS_CURRENT / 5;
 static const unsigned int MAX_TX_SIGOPS_LEGACY = MAX_BLOCK_SIGOPS_LEGACY / 5;
 
-/** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
-static const int COINBASE_MATURITY = 100;
-
 /** Flags for nSequence and nLockTime locks */
 enum {
     /* Interpret sequence numbers as relative lock-time constraints. */
