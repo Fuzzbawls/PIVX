@@ -217,6 +217,9 @@ bool GetTransaction(const uint256& hash, CTransaction& tx, uint256& hashBlock, b
 bool GetOutput(const uint256& hash, unsigned int index, CValidationState& state, CTxOut& out);
 /** Find the best known block, and make it the tip of the block chain */
 
+//! for accessibility from consensus/zerocoin_verify.cpp
+CAmount GetInvalidUTXOValue();
+
 // ***TODO***
 double ConvertBitsToDouble(unsigned int nBits);
 int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCount, bool isZPIVStake);
@@ -284,27 +287,10 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
 void UpdateCoins(const CTransaction& tx, CValidationState& state, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight);
 
 /** Context-independent validity checks */
-bool CheckZerocoinMint(const uint256& txHash, const CTxOut& txout, CValidationState& state, bool fCheckOnly = false);
-bool CheckZerocoinSpend(const CTransaction& tx, bool fVerifySignature, CValidationState& state, bool fFakeSerialAttack = false);
-bool ContextualCheckZerocoinSpend(const CTransaction& tx, const libzerocoin::CoinSpend* spend, CBlockIndex* pindex, const uint256& hashBlock);
-bool ContextualCheckZerocoinSpendNoSerialCheck(const CTransaction& tx, const libzerocoin::CoinSpend* spend, CBlockIndex* pindex, const uint256& hashBlock);
 bool IsTransactionInChain(const uint256& txId, int& nHeightTx, CTransaction& tx);
 bool IsTransactionInChain(const uint256& txId, int& nHeightTx);
 bool IsBlockHashInChain(const uint256& hashBlock);
 bool ValidOutPoint(const COutPoint& out, int nHeight);
-void AddWrappedSerialsInflation();
-void RecalculateZPIVSpent();
-void RecalculateZPIVMinted();
-bool RecalculatePIVSupply(int nHeightStart);
-bool ReindexAccumulators(std::list<uint256>& listMissingCheckpoints, std::string& strError);
-
-// Fake Serial attack Range
-bool isBlockBetweenFakeSerialAttackRange(int nHeight);
-
-// Public coin spend
-bool CheckPublicCoinSpendEnforced(int blockHeight, bool isPublicSpend);
-int CurrentPublicCoinSpendVersion();
-bool CheckPublicCoinSpendVersion(int version);
 
 /**
  * Check if transaction will be final in the next block to be created.

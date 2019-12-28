@@ -12,6 +12,7 @@
 #include "base58.h"
 #include "checkpoints.h"
 #include "coincontrol.h"
+#include "consensus/zerocoin_verify.h"  // for visibiity of CurrentPublicCoinSpendVersion()
 #include "kernel.h"
 #include "masternode-budget.h"
 #include "net.h"
