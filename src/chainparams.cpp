@@ -417,7 +417,7 @@ public:
         consensus.powLimit   = uint256S("00000ffff0000000000000000000000000000000000000000000000000000000");
         consensus.posLimitv1 = uint256S("000000ffff000000000000000000000000000000000000000000000000000000");
         consensus.posLimitv2 = uint256S("00000ffff0000000000000000000000000000000000000000000000000000000");
-        consensus.nCoinbaseMaturity = 100;
+        consensus.nCoinbaseMaturity = 15;
         consensus.nTargetTimespan = 40 * 60;
         consensus.nTargetSpacing = 1 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
@@ -560,7 +560,7 @@ public:
         consensus.powLimit   = uint256S("ffff000000000000000000000000000000000000000000000000000000000000");
         consensus.posLimitv1 = uint256S("000000ffff000000000000000000000000000000000000000000000000000000");
         consensus.posLimitv2 = uint256S("00000ffff0000000000000000000000000000000000000000000000000000000");
-        consensus.nCoinbaseMaturity = 100;
+        consensus.nCoinbaseMaturity = 15;
         consensus.nTargetTimespan = 40 * 60;
         consensus.nTargetSpacing = 1 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;

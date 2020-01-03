@@ -456,7 +456,10 @@ set(COMMON_SOURCES
         ./src/compressor.cpp
         ./src/consensus/merkle.cpp
         ./src/consensus/tx_verify.cpp
+        ./src/consensus/tx_verify.h
+        ./src/consensus/params.h
         ./src/consensus/zerocoin_verify.cpp
+        ./src/consensus/zerocoin_verify.h
         ./src/primitives/block.cpp
         ./src/zpiv/deterministicmint.cpp
         ./src/primitives/transaction.cpp
