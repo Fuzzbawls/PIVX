@@ -22,9 +22,11 @@ Build-Depends: debhelper,
  libminiupnpc8-dev | libminiupnpc-dev,
  xvfb,
  qtbase5-dev, qttools5-dev-tools, qttools5-dev,
+ libqt5svg5-dev,
+ libqt5charts5-dev | qtbase5-dev,
  libqrencode-dev,
  libprotobuf-dev, protobuf-compiler,
- python,
+ python3 | python,
  libzmq3-dev,
  dh-systemd
 Standards-Version: 3.9.2
