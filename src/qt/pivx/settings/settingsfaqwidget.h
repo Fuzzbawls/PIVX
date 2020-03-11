@@ -18,7 +18,7 @@ class SettingsFaqWidget : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsFaqWidget(PIVXGUI* _window = nullptr, QWidget *parent = nullptr);
+    explicit SettingsFaqWidget(PIVXGUI *parent = nullptr);
     ~SettingsFaqWidget();
 
     void showEvent(QShowEvent *event) override;

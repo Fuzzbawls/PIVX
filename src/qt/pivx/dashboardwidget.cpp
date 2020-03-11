@@ -161,10 +161,6 @@ DashboardWidget::DashboardWidget(PIVXGUI* parent) :
     setShadow(ui->layoutShadow);
 
     connect(ui->listTransactions, &QListView::clicked, this, &DashboardWidget::handleTransactionClicked);
-#ifdef USE_QTCHARTS
-    if (window)
-        connect(window, &PIVXGUI::windowResizeEvent, this, &DashboardWidget::windowResizeEvent);
-#endif // USE_QTCHARTS
 
 bool hasCharts = false;
 #ifdef USE_QTCHARTS
@@ -174,6 +170,8 @@ bool hasCharts = false;
     connect(ui->pushButtonYear, &QPushButton::clicked, [this](){setChartShow(YEAR);});
     connect(ui->pushButtonMonth, &QPushButton::clicked, [this](){setChartShow(MONTH);});
     connect(ui->pushButtonAll, &QPushButton::clicked, [this](){setChartShow(ALL);});
+    if (window)
+        connect(window, &PIVXGUI::windowResizeEvent, this, &DashboardWidget::windowResizeEvent);
 #endif
 
     if (hasCharts) {

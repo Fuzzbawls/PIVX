@@ -8,10 +8,9 @@
 #include <QMetaObject>
 #include "qt/pivx/qtutils.h"
 
-SettingsFaqWidget::SettingsFaqWidget(PIVXGUI* _window, QWidget *parent) :
+SettingsFaqWidget::SettingsFaqWidget(PIVXGUI *parent) :
     QDialog(parent),
-    ui(new Ui::SettingsFaqWidget),
-    window(_window)
+    ui(new Ui::SettingsFaqWidget)
 {
     ui->setupUi(this);
 

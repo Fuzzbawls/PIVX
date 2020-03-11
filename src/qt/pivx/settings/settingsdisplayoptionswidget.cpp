@@ -101,9 +101,9 @@ SettingsDisplayOptionsWidget::SettingsDisplayOptionsWidget(PIVXGUI* _window, QWi
     setCssBtnSecondary(ui->pushButtonClean);
 
     initLanguages();
-    connect(ui->pushButtonSave, &QPushButton::clicked, [=] { Q_EMIT saveSettings(); });
+    connect(ui->pushButtonSave, &QPushButton::clicked, [this] { Q_EMIT saveSettings(); });
     connect(ui->pushButtonReset, &QPushButton::clicked, this, &SettingsDisplayOptionsWidget::onResetClicked);
-    connect(ui->pushButtonClean, &QPushButton::clicked, [=] { Q_EMIT discardSettings(); });
+    connect(ui->pushButtonClean, &QPushButton::clicked, [this] { Q_EMIT discardSettings(); });
 }
 
 void SettingsDisplayOptionsWidget::initLanguages(){

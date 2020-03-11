@@ -563,7 +563,7 @@ int PIVXGUI::getNavWidth(){
 
 void PIVXGUI::openFAQ(int section){
     showHide(true);
-    SettingsFaqWidget* dialog = new SettingsFaqWidget(this, this);
+    SettingsFaqWidget* dialog = new SettingsFaqWidget(this);
     if (section > 0) dialog->setSection(section);
     openDialogWithOpaqueBackgroundFullScreen(dialog, this);
     dialog->deleteLater();

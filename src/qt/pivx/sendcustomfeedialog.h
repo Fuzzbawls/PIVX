@@ -20,7 +20,7 @@ class SendCustomFeeDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SendCustomFeeDialog(PIVXGUI* _window, QWidget *parent = nullptr);
+    explicit SendCustomFeeDialog(PIVXGUI *parent = nullptr);
     ~SendCustomFeeDialog();
 
     void setWalletModel(WalletModel* model);
