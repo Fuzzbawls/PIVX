@@ -29,7 +29,7 @@ SnackBar::SnackBar(PIVXGUI* _window, QWidget *parent) :
     }
 }
 
-void SnackBar::windowResizeEvent() {
+void SnackBar::windowResizeEvent(QResizeEvent* event) {
     this->resize(qobject_cast<QWidget*>(parent())->width(), this->height());
     this->move(QPoint(0, window->height() - this->height() ));
 }

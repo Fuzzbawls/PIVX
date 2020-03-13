@@ -24,7 +24,7 @@ public:
     void showEvent(QShowEvent *event) override;
 
 public Q_SLOTS:
-   void windowResizeEvent();
+   void windowResizeEvent(QResizeEvent* event);
    void setSection(int num);
 private Q_SLOTS:
     void onFaq1Clicked();

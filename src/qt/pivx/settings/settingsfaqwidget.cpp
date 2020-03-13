@@ -166,7 +166,7 @@ void SettingsFaqWidget::onFaq10Clicked(){
     ui->scrollAreaFaq->verticalScrollBar()->setValue(ui->widgetFaq10->y());
 }
 
-void SettingsFaqWidget::windowResizeEvent() {
+void SettingsFaqWidget::windowResizeEvent(QResizeEvent* event) {
     QWidget* w = qobject_cast<QWidget*>(parent());
     this->resize(w->width(), w->height());
     this->move(QPoint(0, 0));

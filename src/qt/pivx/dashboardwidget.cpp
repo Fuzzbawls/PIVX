@@ -777,7 +777,7 @@ void DashboardWidget::onChartArrowClicked(bool goLeft) {
     refreshChart();
 }
 
-void DashboardWidget::windowResizeEvent() {
+void DashboardWidget::windowResizeEvent(QResizeEvent* event) {
     if (hasStakes && axisX) {
         if (width() > 1300) {
             if (isChartMin) {

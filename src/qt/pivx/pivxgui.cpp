@@ -254,9 +254,7 @@ void PIVXGUI::setClientModel(ClientModel* clientModel) {
         settingsWidget->setClientModel(clientModel);
 
         // Receive and report messages from client model
-        connect(clientModel, &ClientModel::message, [this](const QString &title, const QString &message, unsigned int style){
-          this->message(title, message, style);
-        });
+        connect(clientModel, &ClientModel::message, this, &PIVXGUI::message);
         connect(topBar, &TopBar::walletSynced, dashboard, &DashboardWidget::walletSynced);
         connect(topBar, &TopBar::walletSynced, coldStakingWidget, &ColdStakingWidget::walletSynced);
 
@@ -523,7 +521,7 @@ void PIVXGUI::resizeEvent(QResizeEvent* event){
     // background
     showHide(opEnabled);
     // Notify
-    Q_EMIT windowResizeEvent();
+    Q_EMIT windowResizeEvent(event);
 }
 
 bool PIVXGUI::execDialog(QDialog *dialog, int xDiv, int yDiv){

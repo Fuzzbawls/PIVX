@@ -59,7 +59,7 @@ public:
     int getNavWidth();
 Q_SIGNALS:
     void themeChanged(bool isLightTheme, QString& theme);
-    void windowResizeEvent();
+    void windowResizeEvent(QResizeEvent* event);
 public Q_SLOTS:
     void changeTheme(bool isLightTheme);
     void goToDashboard();
