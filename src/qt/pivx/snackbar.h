@@ -6,6 +6,7 @@
 #define SNACKBAR_H
 
 #include <QDialog>
+#include <QResizeEvent>
 
 class PIVXGUI;
 
