@@ -112,7 +112,7 @@ void ReceiveWidget::loadWalletModel() {
         refreshView();
 
         // data change
-        connect(this->addressTableModel, &AddressTableModel::dataChanged, this, &ReceiveWidget::refreshView);
+        connect(this->addressTableModel, &AddressTableModel::dataChanged, [this](const QModelIndex& tl, const QModelIndex& br){ refreshView(tl, br); });
     }
 }
 
