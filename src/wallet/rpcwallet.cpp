@@ -21,6 +21,8 @@
 #include "walletdb.h"
 #include "zpivchain.h"
 
+#include "sapling/key_io_sapling.h"
+
 #include <stdint.h>
 
 #include "libzerocoin/Coin.h"
@@ -390,6 +392,29 @@ UniValue getnewstakingaddress(const UniValue& params, bool fHelp)
             HelpExampleCli("getnewstakingaddress", "") + HelpExampleRpc("getnewstakingaddress", ""));
 
     return EncodeDestination(GetNewAddressFromAccount("coldstaking", params, CChainParams::STAKING_ADDRESS), CChainParams::STAKING_ADDRESS);
+}
+
+UniValue getnewsaplingaddress(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() > 1)
+        throw std::runtime_error(
+                "getnewsaplingaddress\n"
+                "\nReturns a new shielded address for receiving payments.\n"
+                "\nArguments:\n"
+                "\nResult:\n"
+                "\"address\"    (string) The new shielded address.\n"
+                "\nExamples:\n"
+                + HelpExampleCli("getnewsaplingaddress", "")
+                + HelpExampleRpc("getnewsaplingaddress", "")
+        );
+
+    EnsureWallet();
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    EnsureWalletIsUnlocked();
+
+    return KeyIO::EncodePaymentAddress(pwalletMain->GenerateNewSaplingZKey());
 }
 
 UniValue delegatoradd(const UniValue& params, bool fHelp)

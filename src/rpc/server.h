@@ -221,6 +221,7 @@ extern UniValue sethdseed(const UniValue& params, bool fHelp);
 extern UniValue getaddressinfo(const UniValue& params, bool fHelp);
 extern UniValue getnewaddress(const UniValue& params, bool fHelp);
 extern UniValue getnewstakingaddress(const UniValue& params, bool fHelp);
+extern UniValue getnewsaplingaddress(const UniValue& params, bool fHelp);
 extern UniValue getaccountaddress(const UniValue& params, bool fHelp);
 extern UniValue getrawchangeaddress(const UniValue& params, bool fHelp);
 extern UniValue setaccount(const UniValue& params, bool fHelp);
