@@ -58,7 +58,7 @@ endef
 
 define $(package)_preprocess_cmds
   sed -i.old "/define DATE/d" util/mkbuildinf.pl && \
-  sed -i.old "s|return DATE;|return \"built on: date not available;\"|" crypto/cversion.c && \
+  sed -i.old "s|return DATE;|return \"built on: date not available\";|" crypto/cversion.c && \
   sed -i.old "s|apps test util tools fuzz engines providers doc|tools engines|" build.info
 endef
 
