@@ -50,9 +50,6 @@ public:
 class CMasternodeMan
 {
 private:
-    // critical section to protect the inner data structures
-    mutable RecursiveMutex cs;
-
     // critical section to protect the inner data structures specifically on messaging
     mutable RecursiveMutex cs_process_message;
 
@@ -66,6 +63,9 @@ private:
     std::map<COutPoint, int64_t> mWeAskedForMasternodeListEntry;
 
 public:
+    // critical section to protect the inner data structures
+    mutable RecursiveMutex cs;
+
     // Keep track of all broadcasts I've seen
     std::map<uint256, CMasternodeBroadcast> mapSeenMasternodeBroadcast;
     // Keep track of all pings I've seen

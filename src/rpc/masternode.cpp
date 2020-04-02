@@ -176,10 +176,13 @@ UniValue getmasternodecount (const UniValue& params, bool fHelp)
     int nCount = 0;
     int ipv4 = 0, ipv6 = 0, onion = 0;
 
-    if (chainActive.Tip())
-        mnodeman.GetNextMasternodeInQueueForPayment(chainActive.Tip()->nHeight, true, nCount);
+    {
+        LOCK2(cs_main, mnodeman.cs);
+        if (chainActive.Tip())
+            mnodeman.GetNextMasternodeInQueueForPayment(chainActive.Tip()->nHeight, true, nCount);
 
-    mnodeman.CountNetworks(ActiveProtocol(), ipv4, ipv6, onion);
+        mnodeman.CountNetworks(ActiveProtocol(), ipv4, ipv6, onion);
+    }
 
     obj.push_back(Pair("total", mnodeman.size()));
     obj.push_back(Pair("stable", mnodeman.stable_size()));
