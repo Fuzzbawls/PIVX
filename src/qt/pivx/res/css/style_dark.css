@@ -2956,6 +2956,8 @@ QToolTip {
     border: none;
     padding:4px;
     border-radius:3px;
+    margin-right:2px;
+    margin-left:2px;
     text-align: center;
     qproperty-alignment: AlignVCenter;
     min-height: 25px;
