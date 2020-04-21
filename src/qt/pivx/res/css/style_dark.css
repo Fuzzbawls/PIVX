@@ -2955,13 +2955,11 @@ QToolTip {
     background-color: #b088ff;
     border: none;
     padding:4px;
-    border-radius:3px;
-    margin-right:2px;
-    margin-left:2px;
+    margin-right:4px;
     text-align: center;
     qproperty-alignment: AlignVCenter;
     min-height: 25px;
-    min-width: 40px;
+    min-width: 50px;
 }
 
 
