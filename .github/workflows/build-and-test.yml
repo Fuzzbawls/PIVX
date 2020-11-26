@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: 'master'
 
       - name: Initialize Python
         uses: actions/setup-python@v2
@@ -38,6 +39,7 @@ jobs:
 
       - name: Lint
         run: |
+          git checkout -f $GITHUB_SHA
           contrib/devtools/git-subtree-check.sh src/secp256k1
           contrib/devtools/git-subtree-check.sh src/univalue
           contrib/devtools/git-subtree-check.sh src/leveldb
@@ -46,8 +48,13 @@ jobs:
           contrib/devtools/logprint-scanner.py
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PREV_BRANCH=`git name-rev --name-only HEAD`
+            PREV_HEAD=`git rev-parse HEAD`
+            echo "prev-branch: $PREV_BRANCH. prev-head: $PREV_HEAD"
             COMMIT_RANGE="${{ github.base_ref }}..HEAD"
+            echo "Linting whitespace..."
             contrib/devtools/lint-whitespace.sh
+            echo "Checking scripted-diffs..."
             contrib/devtools/commit-script-check.sh $COMMIT_RANGE
             test/lint/lint-qt.sh
           fi
