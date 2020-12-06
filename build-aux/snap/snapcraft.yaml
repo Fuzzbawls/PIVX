@@ -14,6 +14,7 @@ description: |
   - [Download](https://pivx.org/wp-content/uploads/2018/10/PIVX-White.pdf) PIVX White Paper PDF
 grade: devel
 confinement: strict
+
 apps:
   daemon:
     command: pivxd
@@ -30,7 +31,7 @@ apps:
       XDG_DATA_DIRS: $SNAP_USER_DATA:$SNAP/usr/share:$XDG_DATA_DIRS
       HOME: $SNAP_USER_COMMON
   qt:
-    command: pivx-qt
+    command: desktop-launch pivx-qt
     plugs: [network, network-bind, network-status, unity7, desktop, desktop-legacy, wayland, x11, mir, opengl, home, gsettings, removable-media, screen-inhibit-control, pulseaudio, media-hub]
     desktop: pivx-qt.desktop
     environment:
@@ -38,7 +39,7 @@ apps:
       XDG_DATA_DIRS: $SNAP_USER_DATA:$SNAP/usr/share:$XDG_DATA_DIRS
       HOME: $SNAP_USER_COMMON
   qt-testnet:
-    command: pivx-qt --testnet
+    command: desktop-launch pivx-qt --testnet
     plugs: [network, network-bind, network-status, unity7, desktop, desktop-legacy, wayland, x11, mir, opengl, home, gsettings, removable-media, screen-inhibit-control, pulseaudio, media-hub]
     desktop: pivx-qt_testnet.desktop
     environment:
@@ -66,7 +67,44 @@ apps:
   testqt:
     command: test_pivx-qt
     plugs: [home]
+
+layout:
+  /usr/share/pivx/sapling-spend.params:
+    bind-file: $SNAP/share/pivx/sapling-spend.params
+  /usr/share/pivx/sapling-output.params:
+    bind-file: $SNAP/share/pivx/sapling-output.params
+
 parts:
+
+  # Remote part for support of various desktop technologies
+  # Refer: https://github.com/ubuntu/snapcraft-desktop-helpers/blob/master/snapcraft.yaml
+  desktop-qt5:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-depth: 1
+    source-subdir: qt
+
+    plugin: make
+    make-parameters: [ "FLAVOR=qt5" ]
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5 # for loading icon themes which are svg
+      - try: [ appmenu-qt5 ] # not available on core18
+      - locales-all
+      - xdg-user-dirs
+      - fcitx-frontend-qt5
+
   pivx-core:
     source: https://github.com/PIVX-Project/PIVX
     source-type: git
@@ -82,7 +120,6 @@ parts:
       #    default value is "false", to enable it, use your projects binary prefix
       OVERRIDEBINPREFIX="pivx"
       OVERRIDEDATADIR="false"
-      PARAMSDIR=".pivx-params"
       OVERRIDECONF="${OVERRIDEDATADIR}"
       COPYCONF=0    # copy example config into users data folder, 1 = enabled
       JOBS=4        # 0 means off and make will run without -j
@@ -90,7 +127,7 @@ parts:
       SPLASHPNGS=0  # patch pngs to differ visaully from those installed from self compilation or other source like deb
       FIXPPCBUILD=1 # if ppc builds fail due to failed qt, apps part will return error and build will fail, 1 = enabled
       EXTRALOG=0    # prints env and all installed files at the end of current script
-      RUNTESTS=1    # run make check after post install part
+      RUNTESTS=0    # run make check after post install part
       DEPENDS=0     # use the depends system instead of syslibs
       echo "-----------------------------------------------"
       echo "+++++++++++++++++++++++++++++++++++++++++++++++"
@@ -170,9 +207,6 @@ parts:
       echo "+++++++++++++++++++++++++++++++++++++++++++++++"
       cd ${SNAPCRAFT_PART_BUILD}
       echo "Configure and build ${BINPREF}"
-      if [ $RUNTESTS = 1 ]; then
-        mkdir -p ${SNAP_USER_COMMON}/${PARAMSDIR}
-      fi
       ./autogen.sh
       if [ $DEPENDS = 1 ]; then
         ./configure --prefix=`pwd`/depends/${HOST}
@@ -231,13 +265,11 @@ parts:
       echo "CONFIG FILE" # create .pivx folder and copy example config - !!!warning!!!: do not copy as pivx.conf
       echo "+++++++++++++++++++++++++++++++++++++++++++++++"
       mkdir -p ${SNAP_USER_COMMON}/.${DATADIR}
-      mkdir -p ${SNAP_USER_COMMON}/${PARAMSDIR}
       if [ $COPYCONF = 1 ]; then
-        cp ${SNAPCRAFT_PART_BUILD}/contrib/debian/manpages/${CONF}.conf.5 ${SNAP_USER_COMMON}/.${DATADIR}/${CONF}-example.conf
+        cp ${SNAPCRAFT_PART_BUILD}/contrib/debian/examples/${CONF}.conf ${SNAP_USER_COMMON}/.${DATADIR}/${CONF}-example.conf
       else
         echo "COPY CONFIG FILE disabled, skipping"
       fi
-      cp ${SNAPCRAFT_PART_BUILD}/params/*.params ${SNAP_USER_COMMON}/${PARAMSDIR}/
       echo "-----------------------------------------------"
       echo "+++++++++++++++++++++++++++++++++++++++++++++++"
       echo "RUN TESTS" # if tests fail to pass, build and release will fail

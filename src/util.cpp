@@ -472,8 +472,15 @@ void initZKSNARKS()
         CFRelease(mainBundle);
 #else
         // Linux fallback path for debuild/ppa based installs
-        sapling_spend = "/usr/local/share/sapling-spend.params";
-        sapling_output = "/usr/local/share/sapling-output.params";
+        sapling_spend = "/usr/share/pivx/sapling-spend.params";
+        sapling_output = "/usr/share/pivx/sapling-output.params";
+        if (fs::exists(sapling_spend) && fs::exists(sapling_output)) {
+            fParamsFound = true;
+        } else {
+            // Linux fallback for local installs
+            sapling_spend = "/usr/local/share/pivx/sapling-spend.params";
+            sapling_output = "/usr/local/share/pivx/sapling-output.params";
+        }
 #endif
         if (fs::exists(sapling_spend) && fs::exists(sapling_output))
             fParamsFound = true;

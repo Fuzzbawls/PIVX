@@ -41,7 +41,7 @@ function install_params {
     # if the params don't exist in the current directory, assume we're running from release tarballs
     if ! [ -f "$filename" ]
     then
-        filename="share/$filename"
+        filename="share/pivx/$filename"
     fi
 
     if ! [ -f "$output" ]
