@@ -38,14 +38,6 @@ public:
 
     void setClientModel(ClientModel* model);
 
-    enum MessageClass {
-        MC_ERROR,
-        MC_DEBUG,
-        CMD_REQUEST,
-        CMD_REPLY,
-        CMD_ERROR
-    };
-
 protected:
     virtual bool eventFilter(QObject* obj, QEvent* event);
 

@@ -4,15 +4,15 @@
 
 #include "qt/pivx/settings/settingsconsolewidget.h"
 #include "qt/pivx/settings/forms/ui_settingsconsolewidget.h"
+#include "qt/pivx/settings/moc_settingsconsolewidget.cpp"
 
 #include "qt/pivx/qtutils.h"
+#include "qt/rpcexecutor.h"
 
 #include "clientmodel.h"
 #include "guiutil.h"
 
 #include "chainparams.h"
-#include "rpc/client.h"
-#include "rpc/server.h"
 #include "sapling/key_io_sapling.h"
 #include "util.h"
 #include "utilitydialog.h"
@@ -37,7 +37,6 @@
 #include <QSignalMapper>
 #include <QThread>
 #include <QTime>
-#include <QTimer>
 #include <QStringList>
 
 const int CONSOLE_HISTORY = 50;
@@ -51,193 +50,6 @@ const struct {
         {"cmd-error", ":/icons/ic-transaction-sent"},
         {"misc", ":/icons/ic-transaction-staked"},
         {NULL, NULL}};
-
-/* Object for executing console RPC commands in a separate thread.
-*/
-class RPCExecutor : public QObject
-{
-    Q_OBJECT
-
-public Q_SLOTS:
-     void requestCommand(const QString& command);
-
-Q_SIGNALS:
-     void reply(int category, const QString& command);
-};
-
-/** Class for handling RPC timers
- * (used for e.g. re-locking the wallet after a timeout)
- */
-class QtRPCTimerBase: public QObject, public RPCTimerBase
-{
-    Q_OBJECT
-public:
-    QtRPCTimerBase(std::function<void(void)>& _func, int64_t millis):
-            func(_func)
-    {
-        timer.setSingleShot(true);
-        connect(&timer, &QTimer::timeout, [this]{ func(); });
-        timer.start(millis);
-    }
-    ~QtRPCTimerBase() {}
-
-private:
-    QTimer timer;
-    std::function<void(void)> func;
-};
-
-class QtRPCTimerInterface: public RPCTimerInterface
-{
-public:
-    ~QtRPCTimerInterface() {}
-    const char *Name() { return "Qt"; }
-    RPCTimerBase* NewTimer(std::function<void(void)>& func, int64_t millis)
-    {
-        return new QtRPCTimerBase(func, millis);
-    }
-};
-
-#include "qt/pivx/settings/moc_settingsconsolewidget.cpp"
-
-/**
- * Split shell command line into a list of arguments. Aims to emulate \c bash and friends.
- *
- * - Arguments are delimited with whitespace
- * - Extra whitespace at the beginning and end and between arguments will be ignored
- * - Text can be "double" or 'single' quoted
- * - The backslash \c \ is used as escape character
- *   - Outside quotes, any character can be escaped
- *   - Within double quotes, only escape \c " and backslashes before a \c " or another backslash
- *   - Within single quotes, no escaping is possible and no special interpretation takes place
- *
- * @param[out]   args        Parsed arguments will be appended to this list
- * @param[in]    strCommand  Command line to split
- */
-bool parseCommandLineSettings(std::vector<std::string>& args, const std::string& strCommand)
-{
-    enum CmdParseState {
-        STATE_EATING_SPACES,
-        STATE_ARGUMENT,
-        STATE_SINGLEQUOTED,
-        STATE_DOUBLEQUOTED,
-        STATE_ESCAPE_OUTER,
-        STATE_ESCAPE_DOUBLEQUOTED
-    } state = STATE_EATING_SPACES;
-    std::string curarg;
-    for (char ch : strCommand) {
-        switch (state) {
-            case STATE_ARGUMENT:      // In or after argument
-            case STATE_EATING_SPACES: // Handle runs of whitespace
-                switch (ch) {
-                    case '"':
-                        state = STATE_DOUBLEQUOTED;
-                        break;
-                    case '\'':
-                        state = STATE_SINGLEQUOTED;
-                        break;
-                    case '\\':
-                        state = STATE_ESCAPE_OUTER;
-                        break;
-                    case ' ':
-                    case '\n':
-                    case '\t':
-                        if (state == STATE_ARGUMENT) // Space ends argument
-                        {
-                            args.push_back(curarg);
-                            curarg.clear();
-                        }
-                        state = STATE_EATING_SPACES;
-                        break;
-                    default:
-                        curarg += ch;
-                        state = STATE_ARGUMENT;
-                }
-                break;
-            case STATE_SINGLEQUOTED: // Single-quoted string
-                switch (ch) {
-                    case '\'':
-                        state = STATE_ARGUMENT;
-                        break;
-                    default:
-                        curarg += ch;
-                }
-                break;
-            case STATE_DOUBLEQUOTED: // Double-quoted string
-                switch (ch) {
-                    case '"':
-                        state = STATE_ARGUMENT;
-                        break;
-                    case '\\':
-                        state = STATE_ESCAPE_DOUBLEQUOTED;
-                        break;
-                    default:
-                        curarg += ch;
-                }
-                break;
-            case STATE_ESCAPE_OUTER: // '\' outside quotes
-                curarg += ch;
-                state = STATE_ARGUMENT;
-                break;
-            case STATE_ESCAPE_DOUBLEQUOTED:                  // '\' in double-quoted text
-                if (ch != '"' && ch != '\\') curarg += '\\'; // keep '\' for everything but the quote and '\' itself
-                curarg += ch;
-                state = STATE_DOUBLEQUOTED;
-                break;
-        }
-    }
-    switch (state) // final state
-    {
-        case STATE_EATING_SPACES:
-            return true;
-        case STATE_ARGUMENT:
-            args.push_back(curarg);
-            return true;
-        default: // ERROR to end in one of the other states
-            return false;
-    }
-}
-
-void RPCExecutor::requestCommand(const QString& command)
-{
-    std::vector<std::string> args;
-    if (!parseCommandLineSettings(args, command.toStdString())) {
-        Q_EMIT reply(SettingsConsoleWidget::CMD_ERROR, QString("Parse error: unbalanced ' or \""));
-        return;
-    }
-    if (args.empty())
-        return; // Nothing to do
-    try {
-        std::string strPrint;
-        // Convert argument list to JSON objects in method-dependent way,
-        // and pass it along with the method name to the dispatcher.
-        JSONRPCRequest req;
-        req.params = RPCConvertValues(args[0], std::vector<std::string>(args.begin() + 1, args.end()));
-        req.strMethod = args[0];
-        UniValue result = tableRPC.execute(req);
-
-        // Format result reply
-        if (result.isNull())
-            strPrint = "";
-        else if (result.isStr())
-            strPrint = result.get_str();
-        else
-            strPrint = result.write(2);
-
-        Q_EMIT reply(SettingsConsoleWidget::CMD_REPLY, QString::fromStdString(strPrint));
-    } catch (UniValue& objError) {
-        try // Nice formatting for standard-format error
-        {
-            int code = find_value(objError, "code").get_int();
-            std::string message = find_value(objError, "message").get_str();
-            Q_EMIT reply(SettingsConsoleWidget::CMD_ERROR, QString::fromStdString(message) + " (code " + QString::number(code) + ")");
-        } catch (std::runtime_error&) // raised when converting to invalid type, i.e. missing code or message
-        {                             // Show raw JSON object
-            Q_EMIT reply(SettingsConsoleWidget::CMD_ERROR, QString::fromStdString(objError.write()));
-        }
-    } catch (std::exception& e) {
-        Q_EMIT reply(SettingsConsoleWidget::CMD_ERROR, QString("Error: ") + QString::fromStdString(e.what()));
-    }
-}
 
 SettingsConsoleWidget::SettingsConsoleWidget(PIVXGUI* _window, QWidget *parent) :
     PWidget(_window,parent),
@@ -383,20 +195,6 @@ void SettingsConsoleWidget::showEvent(QShowEvent *event)
     if (ui->lineEdit) ui->lineEdit->setFocus();
 }
 
-static QString categoryClass(int category)
-{
-    switch (category) {
-        case SettingsConsoleWidget::CMD_REQUEST:
-            return "cmd-request";
-        case SettingsConsoleWidget::CMD_REPLY:
-            return "cmd-reply";
-        case SettingsConsoleWidget::CMD_ERROR:
-            return "cmd-error";
-        default:
-            return "misc";
-    }
-}
-
 void SettingsConsoleWidget::clear(bool clearHistory)
 {
     ui->messagesWidget->clear();
@@ -425,7 +223,7 @@ void SettingsConsoleWidget::clear(bool clearHistory)
     QString clsKey = "Ctrl-L";
 #endif
 
-    messageInternal(CMD_REPLY, (tr("Welcome to the PIVX RPC console.") + "<br>" +
+    messageInternal(RPCExecutor::CMD_REPLY, (tr("Welcome to the PIVX RPC console.") + "<br>" +
                         tr("Use up and down arrows to navigate history, and %1 to clear screen.").arg("<b>"+clsKey+"</b>") + "<br>" +
                         tr("Type <b>help</b> for an overview of available commands.") +
                         "<br><span class=\"secwarning\"><br>" +
@@ -440,8 +238,8 @@ void SettingsConsoleWidget::messageInternal(int category, const QString& message
     QString timeString = time.toString();
     QString out;
     out += "<table><tr><td class=\"time\" width=\"65\">" + timeString + "</td>";
-    out += "<td class=\"icon\" width=\"32\"><img src=\"" + categoryClass(category) + "\"></td>";
-    out += "<td class=\"message " + categoryClass(category) + "\" valign=\"middle\">";
+    out += "<td class=\"icon\" width=\"32\"><img src=\"" + RPCExecutor::categoryClass(category) + "\"></td>";
+    out += "<td class=\"message " + RPCExecutor::categoryClass(category) + "\" valign=\"middle\">";
     if (html)
         out += message;
     else
@@ -457,18 +255,11 @@ static bool PotentiallyDangerousCommand(const QString& cmd)
         return true;
     }
     if (cmd.size() >= 13 && cmd.leftRef(11) == "dumpprivkey") {
-        // valid PIVX Transparent Address
-        std::vector<std::string> args;
-        parseCommandLineSettings(args, cmd.toStdString());
-        return (args.size() == 2 && IsValidDestinationString(args[1], false));
+        return true;
     }
     if (cmd.size() >= 18 && cmd.leftRef(16) == "exportsaplingkey") {
-        // valid PIVX Shield Address
-        std::vector<std::string> args;
-        parseCommandLineSettings(args, cmd.toStdString());
-        return (args.size() == 2 && KeyIO::IsValidPaymentAddressString(args[1]));
+        return true;
     }
-
     return false;
 }
 
@@ -485,7 +276,7 @@ void SettingsConsoleWidget::on_lineEdit_returnPressed()
             return;
         }
 
-        messageInternal(CMD_REQUEST, cmd);
+        messageInternal(RPCExecutor::CMD_REQUEST, cmd);
         Q_EMIT cmdCommandRequest(cmd);
         // Remove command, if already in history
         history.removeOne(cmd);
@@ -524,7 +315,7 @@ void SettingsConsoleWidget::startExecutor()
     // Replies from executor object must go to this object
     connect(executor, &RPCExecutor::reply, this, &SettingsConsoleWidget::response);
     // Requests from this object must go to executor
-    connect(this, &SettingsConsoleWidget::cmdCommandRequest, executor, &RPCExecutor::requestCommand);
+    connect(this, &SettingsConsoleWidget::cmdCommandRequest, executor, &RPCExecutor::request);
 
     // On stopExecutor signal
     // - queue executor for deletion (in execution thread)

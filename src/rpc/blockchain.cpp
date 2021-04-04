@@ -929,7 +929,7 @@ static UniValue SoftForkMajorityDesc(int version, const CBlockIndex* pindex, con
         rv.pushKV("status", false);
         return rv;
     }
-    rv.pushKV("status", consensusParams.NetworkUpgradeActive(pindex->nHeight, idx));
+    rv.pushKV("status", pindex && consensusParams.NetworkUpgradeActive(pindex->nHeight, idx));
     return rv;
 }
 
