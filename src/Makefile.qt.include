@@ -163,9 +163,7 @@ BITCOIN_MM = \
 
 QT_MOC = \
   qt/pivx.moc \
-  qt/intro.moc \
-  qt/rpcconsole.moc \
-  qt/pivx/settings/moc_settingsconsolewidget.cpp
+  qt/intro.moc
 
 QT_QRC_CPP = qt/qrc_pivx.cpp
 QT_QRC = qt/pivx.qrc

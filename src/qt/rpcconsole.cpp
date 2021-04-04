@@ -20,8 +20,6 @@
 #include "wallet/wallet.h"
 #endif // ENABLE_WALLET
 
-#include <univalue.h>
-
 #ifdef ENABLE_WALLET
 #include <db_cxx.h>
 #endif
@@ -61,8 +59,6 @@ const struct {
     {"cmd-error", ":/icons/tx_output"},
     {"misc", ":/icons/tx_inout"},
     {NULL, NULL}};
-
-#include "rpcconsole.moc"
 
 RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
                                           ui(new Ui::RPCConsole),
