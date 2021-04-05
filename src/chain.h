@@ -239,6 +239,9 @@ public:
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     uint32_t nSequenceId{0};
 
+    //! (memory only) Maximum nTime in the chain upto and including this block.
+    unsigned int nTimeMax{0};
+
     CBlockIndex() {}
     CBlockIndex(const CBlock& block);
 
@@ -249,6 +252,8 @@ public:
     CBlockHeader GetBlockHeader() const;
     uint256 GetBlockHash() const { return *phashBlock; }
     int64_t GetBlockTime() const { return (int64_t)nTime; }
+    int64_t GetBlockTimeMax() const { return (int64_t)nTimeMax; }
+
     int64_t GetMedianTimePast() const;
 
     int64_t MaxFutureBlockTime() const;
@@ -595,6 +600,9 @@ public:
 
     /** Find the last common block between this chain and a block index entry. */
     const CBlockIndex* FindFork(const CBlockIndex* pindex) const;
+
+    /** Find the earliest block with timestamp equal or greater than the given. */
+    CBlockIndex* FindEarliestAtLeast(int64_t nTime) const;
 };
 
 #endif // BITCOIN_CHAIN_H

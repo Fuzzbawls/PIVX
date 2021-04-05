@@ -74,6 +74,7 @@ BASE_SCRIPTS= [
     'wallet_keypool_topup.py',                  # ~ 174 sec
     'wallet_txn_doublespend.py --mineblock',    # ~ 157 sec
     'wallet_txn_clone.py --mineblock',          # ~ 157 sec
+    'wallet_importmulti.py',                    # ~ 157 sec
     'rpc_spork.py',                             # ~ 156 sec
     'interface_rest.py',                        # ~ 154 sec
     'feature_proxy.py',                         # ~ 143 sec
@@ -118,7 +119,6 @@ BASE_SCRIPTS= [
     # Don't append tests at the end to avoid merge conflicts
     # Put them in a random line within the section that fits their approximate run-time
     # 'feature_block.py',
-    # 'wallet_importmulti.py',
     # 'mempool_limit.py', # We currently don't limit our mempool_reorg
     # 'rpc_getchaintips.py',
     # 'rpc_users.py',
@@ -212,6 +212,7 @@ LEGACY_SKIP_TESTS = [
     'sapling_wallet_listreceived.py',
     'sapling_wallet_nullifiers.py',
     'sapling_mempool.py',
+    'wallet_importmulti.py',
 ]
 
 # Place the lists with the longest tests (on average) first
