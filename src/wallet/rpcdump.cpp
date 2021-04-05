@@ -924,34 +924,46 @@ UniValue importmulti(const JSONRPCRequest& mainRequest)
 {
     if (mainRequest.fHelp || mainRequest.params.size() < 1 || mainRequest.params.size() > 2)
         throw std::runtime_error(
-            "importmulti \"requests\" \"options\"\n\n"
-            "Import addresses/scripts (with private or public keys, redeem script (P2SH)), rescanning all addresses in one-shot-only (rescan can be disabled via options).\n\n"
-            "Arguments:\n"
+            "importmulti \"requests\" ( \"options\" )\n"
+            "\nImport addresses/scripts (with private or public keys, redeem script (P2SH)), rescanning all addresses in one-shot-only (rescan can be disabled via options).\n" +
+            HelpRequiringPassphrase() + "\n"
+
+            "\nArguments:\n"
             "1. requests     (array, required) Data to be imported\n"
             "  [     (array of json objects)\n"
             "    {\n"
-            "      \"scriptPubKey\": \"<script>\" | { \"address\":\"<address>\" }, (string / json, required) Type of scriptPubKey (string for script, json for address)\n"
-            "      \"redeemscript\": \"<script>\"                            , (string, optional) Allowed only if the scriptPubKey is a P2SH address or a P2SH scriptPubKey\n"
-            "      \"pubkeys\": [\"<pubKey>\", ... ]                         , (array, optional) Array of strings giving pubkeys that must occur in the output or redeemscript\n"
-            "      \"keys\": [\"<key>\", ... ]                               , (array, optional) Array of strings giving private keys whose corresponding public keys must occur in the output or redeemscript\n"
-            "      \"internal\": <true>                                    , (boolean, optional, default: false) Stating whether matching outputs should be be treated as not incoming payments\n"
-            "      \"watchonly\": <true>                                   , (boolean, optional, default: false) Stating whether matching outputs should be considered watched even when they're not spendable, only allowed if keys are empty\n"
-            "      \"label\": <label>                                      , (string, optional, default: '') Label to assign to the address (aka account name, for now), only allowed with internal=false\n"
-            "      \"timestamp\": 1454686740,                                (integer, optional, default now) Timestamp\n"
+            "      \"scriptPubKey\": \"script\" | { \"address\":\"address\" }, (string / JSON, required) Type of scriptPubKey (string for script, json for address)\n"
+            "      \"redeemscript\": \"script\",                           (string, optional) Allowed only if the scriptPubKey is a P2SH address or a P2SH scriptPubKey\n"
+            "      \"pubkeys\": [\"pubKey\", ... ],                        (array, optional) Array of strings giving pubkeys that must occur in the output or redeemscript\n"
+            "      \"keys\": [\"key\", ... ],                              (array, optional) Array of strings giving private keys whose corresponding public keys must occur in the output or redeemscript\n"
+            "      \"internal\": true|false,                               (boolean, optional, default: false) Stating whether matching outputs should be be treated as not incoming payments\n"
+            "      \"watchonly\": true|false,                              (boolean, optional, default: false) Stating whether matching outputs should be considered watched even when they're not spendable, only allowed if keys are empty\n"
+            "      \"label\": label,                                       (string, optional, default: '') Label to assign to the address, only allowed with internal=false\n"
+            "      \"timestamp\": 1454686740,                              (integer, optional, default now) Timestamp\n"
             "    }\n"
             "  ,...\n"
             "  ]\n"
-            "2. options                 (json, optional)\n"
+            "2. options                 (JSON, optional)\n"
             "  {\n"
-            "     \"rescan\": <false>,         (boolean, optional, default: true) Stating if should rescan the blockchain after all imports\n"
+            "     \"rescan\": true|false,         (boolean, optional, default: true) Stating if should rescan the blockchain after all imports\n"
             "  }\n"
+
+            "\nResult:\n"
+            "[                               (Array) An array with the same size as the input that has the execution result\n"
+            "  {\n"
+            "    \"success\": true|false,    (boolean) True if import succeeded, otherwise false\n"
+            "    \"error\": {                (JSON Object) Object containing error information. Only present when import fails\n"
+            "      \"code\": n,              (numeric) The error code\n"
+            "      \"message\": xxxx         (string) The error message\n"
+            "    }\n"
+            "  }\n"
+            "  ,...\n"
+            "]\n"
+
             "\nExamples:\n" +
             HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }, "
                                           "{ \"scriptPubKey\": { \"address\": \"<my 2nd address>\" }, \"label\": \"example 2\", \"timestamp\": 1455191480 }]'") +
-            HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }]' '{ \"rescan\": false}'") +
-
-            "\nResponse is an array with the same size as the input that has the execution result :\n"
-            "  [{ \"success\": true } , { \"success\": false, \"error\": { \"code\": -1, \"message\": \"Internal Server Error\"} }, ... ]\n");
+            HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }]' '{ \"rescan\": false}'"));
 
     EnsureWallet();
 
