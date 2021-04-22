@@ -65,6 +65,19 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     #add_definitions("-D__BYTE_ORDER -D__LITTLE_ENDIAN -D__GLIBC__ -DHAVE_DECL_BSWAP_16=0 -DHAVE_DECL_BSWAP_32=0 -DHAVE_DECL_BSWAP_64=0")
 endif()
 
+# Enable code coverage
+if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
+        OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+    message(STATUS "Building with llvm Code Coverage Tools")
+    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+    find_program(LCOV_FOUND lcov)
+    if(LCOV_FOUND)
+        message(STATUS "Building with lcov Code Coverage tools")
+        set(CMAKE_CXX_FLAGS "--coverage")
+    endif()
+endif()
+
 # Find Dependencies
 find_package(BerkeleyDB ${BDB_VER} REQUIRED)
 if(BerkeleyDB_FOUND)
