@@ -39,6 +39,7 @@
 #include "policy/policy.h"
 #include "rpc/register.h"
 #include "rpc/server.h"
+#include "sapling/sodium_sanity.h"
 #include "script/sigcache.h"
 #include "script/standard.h"
 #include "scheduler.h"
@@ -770,6 +771,8 @@ bool InitSanityCheck(void)
         UIError("OS cryptographic RNG sanity check failure. Aborting.");
         return false;
     }
+
+    libsodium_sanity_test();
 
     return true;
 }
