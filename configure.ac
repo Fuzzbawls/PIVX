@@ -1552,6 +1552,8 @@ if test x$need_bundled_univalue = xyes; then
   AC_CONFIG_SUBDIRS([src/univalue])
 fi
 
+AC_CONFIG_SUBDIRS([src/chiabls])
+
 ac_configure_args="${ac_configure_args} --disable-shared --with-pic --with-bignum=no --enable-module-recovery --disable-jni"
 AC_CONFIG_SUBDIRS([src/secp256k1])
 
@@ -1575,6 +1577,8 @@ case ${OS} in
      mv test/config-2.ini test/config.ini
    ;;
 esac
+
+sed -i.old '/PACKAGE/d' src/chiabls/contrib/relic/include/relic_conf.h
 
 echo
 echo "Options used to compile and link:"
