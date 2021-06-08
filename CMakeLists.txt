@@ -355,6 +355,9 @@ target_include_directories(ZEROCOIN_A PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(COMMON_SOURCES
         ./src/base58.cpp
         ./src/bip38.cpp
+        ./src/bls/bls.cpp
+        ./src/bls/bls_ies.cpp
+        ./src/bls/bls_worker.cpp
         ./src/consensus/params.cpp
         ./src/consensus/upgrades.cpp
         ./src/chainparams.cpp
