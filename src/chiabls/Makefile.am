@@ -425,8 +425,8 @@ runbench_SOURCES = \
   $(BLS_H)
 
 runbench_CPPFLAGS = $(AM_CPPFLAGS) $(CHIABLS_INCLUDES)
-runbench_CXXFLAGS = $(AM_CXXFLAGS) -fPIE
-runbench_LDFLAGS = $(AM_LDFLAGS)
+runbench_CXXFLAGS = $(AM_CXXFLAGS)
+runbench_LDFLAGS = $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 runbench_LDADD = $(LIBCHIABLS) $(SODIUM_LIBS) $(GMP_LIBS)
 
@@ -441,8 +441,8 @@ runtest_SOURCES = src/test.cpp \
   contrib/catch/catch.hpp
 
 runtest_CPPFLAGS = $(AM_CPPFLAGS) $(CHIABLS_INCLUDES) -I$(top_srcdir)/contrib/catch
-runtest_CXXFLAGS = $(AM_CXXFLAGS) -fPIE
-runtest_LDFLAGS = $(AM_LDFLAGS)
+runtest_CXXFLAGS = $(AM_CXXFLAGS)
+runtest_LDFLAGS = $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 runtest_LDADD = $(LIBCHIABLS) $(SODIUM_LIBS) $(GMP_LIBS)
 
