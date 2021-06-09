@@ -214,6 +214,15 @@ case $host in
      AC_DEFINE([WSIZE], [64], [Size of word in this architecture.])
      AC_DEFINE([SEED], [WCGR], [Chosen random generator seeder.])
      AC_DEFINE([OPSYS], [WINDOWS], [Detected operation system.])
+     LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"
+
+     dnl libtool insists upon adding -nostdlib and a list of objects/libs to link against.
+     dnl That breaks our ability to build dll's with static libgcc/libstdc++/libssp. Override
+     dnl its command here, with the predeps/postdeps removed, and -static inserted. Postdeps are
+     dnl also overridden to prevent their insertion later.
+     dnl This should only affect dll's.
+     archive_cmds_CXX="\$CC -shared \$libobjs \$deplibs \$compiler_flags -static -o \$output_objdir/\$soname \${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker \$lib"
+     postdeps_CXX=
      ;;
 esac
 
@@ -442,6 +451,7 @@ AC_SUBST(GMP_LIBS)
 AC_SUBST(RELIC_CPPFLAGS)
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(NOWARN_CFLAGS)
+AC_SUBST(LIBTOOL_APP_LDFLAGS)
 
 
 AC_CONFIG_HEADERS([contrib/relic/include/relic_conf.h])
