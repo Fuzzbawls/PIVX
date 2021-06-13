@@ -205,6 +205,10 @@ case $host in
           AC_DEFINE([ARCH], [ARM], [Architecture.])
           AC_DEFINE([WSIZE], [64], [Size of word in this architecture.])
           ;;
+       *)
+          CPU_ARCH="none"
+          AC_DEFINE([WSIZE], [64], [Size of word in this architecture.])
+          ;;
      esac
      ;;
   *mingw*)
