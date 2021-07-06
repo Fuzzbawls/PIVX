@@ -309,11 +309,11 @@ jobs:
           - name: x86_64 Linux  [GOAL:install]  [bionic]  [no depends only system libs]
             os: ubuntu-18.04
             host: x86_64-unknown-linux-gnu
-            apt_get: python3-zmq qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev libqrencode-dev libgmp-dev cargo
+            apt_get: qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libnatpmp-dev libqrencode-dev libgmp-dev cargo
             unit_tests: true
             no_depends: 1
             goal: install
-            BITCOIN_CONFIG: "--enable-zmq --with-incompatible-bdb --with-gui=qt5 CPPFLAGS=-DDEBUG_LOCKORDER"
+            BITCOIN_CONFIG: "--disable-zmq --with-incompatible-bdb --with-gui=qt5 CPPFLAGS=-DDEBUG_LOCKORDER"
 
           - name: x86_64 Linux  [GOAL:install]  [focal]  [no depends only system libs]
             os: ubuntu-20.04
@@ -365,18 +365,23 @@ jobs:
           fi
 
           if [ "${{ matrix.config.no_depends }}" = 1 ]; then
-            if [ "${{ matrix.config.os }}" != "ubuntu-20.04" ] && "${{ matrix.config.os }}" != "macos-10.15" ]; then
-                sudo dpkg --remove --force-depends libsodium-dev
+            if [[ ${{ matrix.config.os }} = ubuntu-18* ]]; then
+                sudo dpkg --purge --force-depends libsodium-dev libsodium23
             fi
 
             if [[ ${{ matrix.config.os }} = macos* ]]; then
-                brew install "$APT_BASE" ${{ matrix.config.packages }}
-                brew uninstall --ignore-dependencies libsodium
+                brew uninstall --ignore-dependencies libsodium berkeley-db
+                sed -i -e 's|disable-shared|enable-shared|g'  contrib/install_sodium.sh
             fi
 
             echo "Installing libsodium.."
             sudo ./contrib/install_sodium.sh `pwd`
             echo "libsodium install finished.."
+
+            if [[ ${{ matrix.config.os }} = macos* ]]; then
+                sudo mkdir -p /usr/local/opt/libsodium
+                sudo ln -s -f /usr/local/lib /usr/local/opt/libsodium/lib
+            fi
           fi
 
       - name: depends cache files
@@ -444,6 +449,8 @@ jobs:
             CXX=${{ matrix.config.cxx }}
             export CC
             export CXX
+            export CPPFLAGS="-I/usr/local/Cellar/gmp/6.2.1/include -I/usr/local/opt/berkeley-db@4/include -I/usr/local/include"
+            export LDFLAGS="-L/usr/local/Cellar/gmp/6.2.1/lib -L/usr/local/opt/berkeley-db@4/lib -L/usr/local/lib"
           fi
 
           if [[ ${{ matrix.config.os }} = ubuntu* ]]; then
@@ -454,6 +461,10 @@ jobs:
           if [ "${{ matrix.config.unit_tests }}" = "true" ] || [ "${{ matrix.config.functional_tests }}" = "true" ]; then
             mkdir -p $PARAMS_DIR
             PARAMS_FLAGS="--with-params-dir=$PARAMS_DIR"
+          fi
+
+          if [ "${{ matrix.config.no_depends }}" = 1 ]; then
+            export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
           fi
 
           echo ::group::Autogen
