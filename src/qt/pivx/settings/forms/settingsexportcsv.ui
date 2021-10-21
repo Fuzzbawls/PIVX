@@ -94,7 +94,7 @@
            <item>
             <widget class="QLabel" name="labelSubtitleLocation">
              <property name="text">
-              <string>Where</string>
+              <string>Export Transaction History</string>
              </property>
             </widget>
            </item>
