@@ -63,6 +63,9 @@ void SendCustomFeeDialog::showEvent(QShowEvent* event)
 {
     FocusedDialog::showEvent(event);
     updateFee();
+
+    ui->labelCustomFee->setText(BitcoinUnits::name(walletModel->getOptionsModel()->getDisplayUnit()) + "/kB");
+
     if (walletModel->hasWalletCustomFee()) {
         ui->checkBoxCustom->setChecked(true);
         onCustomChecked();
