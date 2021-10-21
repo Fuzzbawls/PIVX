@@ -66,6 +66,7 @@ RequestDialog::RequestDialog(QWidget *parent) :
 void RequestDialog::setWalletModel(WalletModel *model)
 {
     this->walletModel = model;
+    ui->comboBoxCoin->setText(BitcoinUnits::name(this->walletModel->getOptionsModel()->getDisplayUnit()));
 }
 
 void RequestDialog::setPaymentRequest(bool isPaymentRequest)
@@ -116,7 +117,7 @@ void RequestDialog::accept()
         CallResult<Destination> r;
         if (this->isPaymentRequest) {
             r = walletModel->getNewAddress(label);
-            title = tr("Request for ") + BitcoinUnits::format(displayUnit, value, false, BitcoinUnits::separatorAlways) + " " + QString(CURRENCY_UNIT.c_str());
+            title = tr("Request for ") + BitcoinUnits::format(displayUnit, value, false, BitcoinUnits::separatorAlways) + " " + BitcoinUnits::name(displayUnit);
         } else {
             r = walletModel->getNewStakingAddress(label);
             title = tr("Cold Staking Address Generated");
