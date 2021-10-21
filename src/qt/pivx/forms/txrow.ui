@@ -159,7 +159,7 @@
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>+0.000585 PIV</string>
+               <string notr="true">N/A</string>
               </property>
              </widget>
             </item>
@@ -169,7 +169,7 @@
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>-0.000585 PIV</string>
+               <string notr="true">N/A</string>
               </property>
              </widget>
             </item>

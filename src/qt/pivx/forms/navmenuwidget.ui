@@ -366,7 +366,7 @@ STAKING</string>
          </size>
         </property>
         <property name="text">
-         <string>V 1.0.0</string>
+         <string notr="true">N/A</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignBottom|Qt::AlignHCenter</set>

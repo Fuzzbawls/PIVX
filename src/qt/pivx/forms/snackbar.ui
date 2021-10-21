@@ -74,7 +74,7 @@ font-size: 15px;
 color:white;</string>
         </property>
         <property name="text">
-         <string>Contact Stored</string>
+         <string notr="true">N/A</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

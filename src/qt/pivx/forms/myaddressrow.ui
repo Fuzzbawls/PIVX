@@ -54,7 +54,7 @@
      <item>
       <widget class="QLabel" name="labelDate">
        <property name="text">
-        <string notr="true">Date</string>
+        <string notr="true">N/A</string>
        </property>
       </widget>
      </item>
@@ -63,7 +63,7 @@
    <item>
     <widget class="QLabel" name="labelAddress">
      <property name="text">
-      <string notr="true">DN6i46dytMPVhV1JMGZFuQBh7BZZ6nNLox</string>
+      <string notr="true">N/A</string>
      </property>
     </widget>
    </item>
