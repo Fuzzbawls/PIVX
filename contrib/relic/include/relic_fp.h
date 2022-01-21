@@ -98,6 +98,8 @@ enum {
 	PRIME_383187,
 	/** NIST 384-bit fast reduction polynomial. */
 	NIST_384,
+	/** Curve448 prime. */
+	PRIME_448,
 	/** Curve511187 511-bit prime modulus. */
 	PRIME_511187,
 	/** NIST 521-bit fast reduction polynomial. */
@@ -108,10 +110,14 @@ enum {
 	BN_254,
 	/** 256-bit prime provided in Barreto et al. for BN curves. */
 	BN_256,
+	/** 256-bit prime provided for BN curve standardized in China. */
+	SM9_256,
 	/** 381-bit prime for BLS curve of embedding degree 12 (Zcash). */
 	B12_381,
 	/** 382-bit prime provided by Barreto for BN curve. */
 	BN_382,
+	/** 383-bit prime for GT-strong BLS curve of embedding degree 12. */
+	B12_383,
 	/** 446-bit prime provided by Barreto for BN curve. */
 	BN_446,
 	/** 446-bit prime for BLS curve of embedding degree 12. */
@@ -119,13 +125,13 @@ enum {
 	/** 455-bit prime for BLS curve of embedding degree 12. */
 	B12_455,
 	/** 477-bit prime for BLS curve of embedding degree 24. */
-	B24_477,
+	B24_509,
 	/** 508-bit prime for KSS16 curve. */
 	KSS_508,
 	/** 511-bit prime for Optimal TNFS-secure curve. */
 	OT_511,
 	/** Random 544-bit prime for Cocks-Pinch curve with embedding degree 8. */
-	CP8_544,
+	GMT8_544,
 	/** 569-bit prime for KSS curve with embedding degree 54. */
 	K54_569,
 	/** 575-bit prime for BLS curve with embedding degree 48. */
@@ -354,8 +360,28 @@ typedef rlc_align dig_t fp_st[RLC_FP_DIGS + RLC_PAD(RLC_FP_BYTES)/(RLC_DIG / 8)]
 #define fp_inv(C, A)	fp_inv_exgcd(C, A)
 #elif FP_INV == DIVST
 #define fp_inv(C, A)	fp_inv_divst(C, A)
+#elif FP_INV == JMPDS
+#define fp_inv(C, A)	fp_inv_jmpds(C, A)
 #elif FP_INV == LOWER
 #define fp_inv(C, A)	fp_inv_lower(C, A)
+#endif
+
+/**
+ * Computes the Legendre symbol of a prime field element. Computes C = (A|P).
+ *
+ * @param[out] C			- the result.
+ * @param[in] A				- the prime field element to compute.
+ */
+#if FP_SMB == BASIC
+#define fp_smb(A)		fp_smb_basic(A)
+#elif FP_SMB == BINAR
+#define fp_smb(A)		fp_smb_binar(A)
+#elif FP_SMB == DIVST
+#define fp_smb(A)		fp_smb_divst(A)
+#elif FP_SMB == JMPDS
+#define fp_smb(A)		fp_smb_jmpds(A)
+#elif FP_SMB == LOWER
+#define fp_smb(A)		fp_smb_lower(A)
 #endif
 
 /**
@@ -1024,6 +1050,16 @@ void fp_inv_exgcd(fp_t c, const fp_t a);
 void fp_inv_divst(fp_t c, const fp_t a);
 
 /**
+ * Inverts a prime field element using the constant-time jump division step
+ * by Bernstein and Bo-Yin Yang.
+ *
+ * @param[out] c			- the result.
+ * @param[in] a				- the prime field element to invert.
+ * @throw ERR_NO_VALID		- if the field element is not invertible.
+ */
+void fp_inv_jmpds(fp_t c, const fp_t a);
+
+/**
  * Inverts a prime field element using a direct call to the lower layer.
  *
  * @param[out] c			- the result.
@@ -1040,6 +1076,49 @@ void fp_inv_lower(fp_t c, const fp_t a);
  * @param[in] n				- the number of elements.
  */
 void fp_inv_sim(fp_t *c, const fp_t *a, int n);
+
+/**
+ * Computes Legendre symbol of a prime field element using exponentiation.
+ *
+ * @param[in] a				- the prime field element to compute.
+ * @return the result.
+ */
+int fp_smb_basic(const fp_t a);
+
+/**
+ * Computes Legendre symbol of a prime field element using the binary method.
+ *
+ * @param[in] a				- the prime field element to compute.
+ * @return the result.
+ */
+int fp_smb_binar(const fp_t a);
+
+/**
+ * Computes Legendre symbol of a prime field element using the constant-time
+ * division step approach by Bernstein and Bo-Yin Yang.
+ *
+ * @param[in] a				- the prime field element to compute.
+ * @return the result.
+ */
+int fp_smb_divst(const fp_t a);
+
+/**
+ * Computes Legendre symbol of a prime field element using the constant-time
+ * jump division step approach by Bernstein and Bo-Yin Yang.
+ *
+ * @param[in] a				- the prime field element to compute.
+ * @return the result.
+ */
+int fp_smb_jmpds(const fp_t a);
+
+/**
+ * Computes Legendre symbol a prime field element using a direct call to the
+ * lower layer.
+ *
+ * @param[in] a				- the prime field element to invert.
+ * @return the result.
+ */
+int fp_smb_lower(const fp_t a);
 
 /**
  * Exponentiates a prime field element using the binary

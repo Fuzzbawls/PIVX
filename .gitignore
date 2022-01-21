@@ -59,6 +59,9 @@ blsbench.*
 
 runbench
 runtest
+runtest.log
+runtest.trs
+test-suite.log
 
 **/.DS_Store
 

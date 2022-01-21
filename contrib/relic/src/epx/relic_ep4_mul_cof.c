@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (c) 2013 RELIC Authors
+ * Copyright (c) 2021 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -24,50 +24,70 @@
 /**
  * @file
  *
- * Implementation of the low-le&vel in&version functions.
+ * Implementation of point multiplication of a prime elliptic curve over a
+ * quadratic extension by the curve cofactor.
  *
- * @&version $Id$
- * @ingroup fp
+ * @ingroup epx
  */
 
-#include "relic_bn.h"
-#include "relic_fp.h"
-#include "relic_fp_low.h"
 #include "relic_core.h"
+#include "relic_md.h"
+#include "relic_tmpl_map.h"
 
 /*============================================================================*/
 /* Public definitions                                                         */
 /*============================================================================*/
 
-int fp_invn_asm(dig_t *, const dig_t *, const dig_t *);
+void ep4_mul_cof(ep4_t r, ep4_t p) {
+	bn_t z;
+	ep4_t t0, t1, t2, t3;
 
-void fp_invm_low(dig_t *c, const dig_t *a) {
-	fp_t t, x1;
-	int j, k;
-
-	fp_null(t);
-	fp_null(x1);
+	ep4_null(t0);
+	ep4_null(t1);
+	ep4_null(t2);
+	ep4_null(t3);
+	bn_null(z);
 
 	RLC_TRY {
-		fp_new(t);
-		fp_new(x1);
+		ep4_new(t0);
+		ep4_new(t1);
+		ep4_new(t2);
+		ep4_new(t3);
 
-		/* u = a, v = p, x1 = 1, x2 = 0, k = 0. */
-		k = fp_invn_asm(x1, a, c);
-		if (k > RLC_FP_DIGS * RLC_DIG) {
-			t[0] = t[1] = t[2] = t[3] = 0;
-			k = 512 - k;
-			j = k % 64;
-			k = k / 64;
-			t[k] = (dig_t)1 << j;
-			fp_mul(c, x1, t);
-		}
-	}
-	RLC_CATCH_ANY {
+		fp_prime_get_par(z);
+
+		ep4_mul_basic(t0, p, z);
+		ep4_mul_basic(t1, t0, z);
+		ep4_mul_basic(t2, t1, z);
+		ep4_mul_basic(t3, t2, z);
+
+		ep4_sub(t3, t3, t2);
+		ep4_sub(t3, t3, p);
+		ep4_sub(t2, t2, t1);
+		ep4_frb(t2, t2, 1);
+
+		ep4_sub(t1, t1, t0);
+		ep4_frb(t1, t1, 2);
+
+		ep4_sub(t0, t0, p);
+		ep4_frb(t0, t0, 3);
+
+		ep4_dbl(r, p);
+		ep4_frb(r, r, 4);
+		ep4_add(r, r, t0);
+		ep4_add(r, r, t1);
+		ep4_add(r, r, t2);
+		ep4_add(r, r, t3);
+
+		ep4_norm(r, r);
+	} RLC_CATCH_ANY {
 		RLC_THROW(ERR_CAUGHT);
-	}
-	RLC_FINALLY {
-		fp_free(t);
-		fp_free(x1);
+	} RLC_FINALLY {
+		ep4_free(t0);
+		ep4_free(t1);
+		ep4_free(t2);
+		ep4_free(t3);
+		bn_free(z);
+
 	}
 }

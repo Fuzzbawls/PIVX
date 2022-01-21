@@ -471,9 +471,13 @@ TEST_CASE("Error handling")
     {
         vector<uint8_t> buf(G1Element::SIZE, 0);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 0xFF; i++) {
             buf[0] = (uint8_t)i;
-            REQUIRE_THROWS(G1Element::FromByteVector(buf));
+            if (i == 0xc0) { // Infinity prefix shouldn't throw here as we have only zero values
+                REQUIRE_NOTHROW(G1Element::FromByteVector(buf));
+            } else {
+                REQUIRE_THROWS(G1Element::FromByteVector(buf));
+            }
         }
     }
 
@@ -481,10 +485,17 @@ TEST_CASE("Error handling")
     {
         vector<uint8_t> buf(G2Element::SIZE, 0);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 0xFF; i++) {
             buf[0] = (uint8_t)i;
-            REQUIRE_THROWS(G2Element::FromByteVector(buf));
+            if (i == 0xc0) { // Infinity prefix shouldn't throw here as we have only zero values
+                REQUIRE_NOTHROW(G2Element::FromByteVector(buf));
+            } else {
+                REQUIRE_THROWS(G2Element::FromByteVector(buf));
+            }
         }
+        // Trigger "G2 element must always have 48th byte start with 0b000" error case
+        buf[48] = 0xFF;
+        REQUIRE_THROWS(G2Element::FromByteVector(buf));
     }
 
     SECTION("Error handling should be thread safe")
