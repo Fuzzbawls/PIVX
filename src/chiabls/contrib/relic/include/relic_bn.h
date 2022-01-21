@@ -148,11 +148,11 @@ typedef bn_st *bn_t;
 	if ((A) == NULL) {														\
 		RLC_THROW(ERR_NO_MEMORY);											\
 	}																		\
-	bn_init(A, RLC_BN_SIZE);												\
+	bn_make(A, RLC_BN_SIZE);												\
 
 #elif ALLOC == AUTO
 #define bn_new(A)															\
-	bn_init(A, RLC_BN_SIZE);												\
+	bn_make(A, RLC_BN_SIZE);												\
 
 #endif
 
@@ -172,11 +172,11 @@ typedef bn_st *bn_t;
 	if (A == NULL) {														\
 		RLC_THROW(ERR_NO_MEMORY);											\
 	}																		\
-	bn_init(A, D);															\
+	bn_make(A, D);															\
 
 #elif ALLOC == AUTO
 #define bn_new_size(A, D)													\
-	bn_init(A, D);															\
+	bn_make(A, D);															\
 
 #endif
 
@@ -374,7 +374,7 @@ typedef bn_st *bn_t;
  * @throw ERR_PRECISION		- if the required precision cannot be represented
  * 							by the library.
  */
-void bn_init(bn_t a, int digits);
+void bn_make(bn_t a, int digits);
 
 /**
  * Cleans a multiple precision integer.
@@ -858,6 +858,17 @@ void bn_div_rem_dig(bn_t c, dig_t *d, const bn_t a, const dig_t b);
 void bn_mod_inv(bn_t c, const bn_t a, const bn_t b);
 
 /**
+ * Computes the modular inverse of multiple precision integers simultaneously.
+ * Computes c_i such that a_i * c_i mod b = 1.
+ *
+ * @param[out] c			- the results.
+ * @param[in] a				- the elements to invert.
+ * param[in] b				- the modulus.
+ * @param[in] n				- the number of elements.
+ */
+void bn_mod_inv_sim(bn_t *c, const bn_t *a, const bn_t b, int n);
+
+/**
  * Reduces a multiple precision integer modulo a power of 2. Computes
  * c = a mod 2^b.
  *
@@ -1145,20 +1156,22 @@ void bn_lcm(bn_t c, const bn_t a, const bn_t b);
 /**
  * Computes the Legendre symbol c = (a|b), b prime.
  *
- * @param[out] c			- the result.
  * @param[in] a				- the first parameter.
  * @param[in] b				- the second parameter.
+ * @throw ERR_NO_VALID		- if there input is negative.
+ * @return the result.
  */
-void bn_smb_leg(bn_t c, const bn_t a, const bn_t b);
+int bn_smb_leg(const bn_t a, const bn_t b);
 
 /**
  * Computes the Jacobi symbol c = (a|b).
  *
- * @param[out] c			- the result.
  * @param[in] a				- the first parameter.
  * @param[in] b				- the second parameter.
+ * @throw ERR_NO_VALID		- if there input is even or negative.
+ * @return the result.
  */
-void bn_smb_jac(bn_t c, const bn_t a, const bn_t b);
+int bn_smb_jac(const bn_t a, const bn_t b);
 
 /**
  * Returns a small precomputed prime from a given position in the list of prime
@@ -1374,5 +1387,18 @@ void bn_rec_jsf(int8_t *jsf, int *len, const bn_t k, const bn_t l);
  */
 void bn_rec_glv(bn_t k0, bn_t k1, const bn_t k, const bn_t n, const bn_t v1[],
 		const bn_t v2[]);
+
+/**
+ * Recodes a scalar in subscalars according to Frobenius endomorphism.
+ *
+ * @param[out] ki			- the recoded subscalars.
+ * @param[in] sub 			- the number of subscalars.
+ * @param[in] k				- the scalar to recode.
+ * @param[in] x 			- the elliptic curve parameter.
+ * @param[in] n				- the elliptic curve group order.
+ * @param[in] bls 			- flag to indicate if it is a BLS12 curve.
+ */
+void bn_rec_frb(bn_t *ki, int sub, const bn_t k, const bn_t x, const bn_t n,
+	int bls);
 
 #endif /* !RLC_BN_H */

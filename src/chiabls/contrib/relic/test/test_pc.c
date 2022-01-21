@@ -367,6 +367,18 @@ static int multiplication1(void) {
 			g1_mul(r, p, n);
 			TEST_ASSERT(g1_is_infty(r) == 1, end);
 		} TEST_END;
+
+		TEST_CASE("point multiplication by digit is correct") {
+			g1_mul_dig(r, p, 0);
+			TEST_ASSERT(g1_is_infty(r), end);
+			g1_mul_dig(r, p, 1);
+			TEST_ASSERT(g1_cmp(p, r) == RLC_EQ, end);
+			bn_rand(k, RLC_POS, RLC_DIG);
+			g1_mul(q, p, k);
+			g1_mul_dig(r, p, k->dp[0]);
+			TEST_ASSERT(g1_cmp(q, r) == RLC_EQ, end);
+		}
+		TEST_END;
 	}
 	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
@@ -641,7 +653,7 @@ static int memory2(void) {
 int util2(void) {
 	int l, code = RLC_ERR;
 	g2_t a, b, c;
-	uint8_t bin[4 * RLC_PC_BYTES + 1];
+	uint8_t bin[8 * RLC_PC_BYTES + 1];
 
 	g2_null(a);
 	g2_null(b);
@@ -945,6 +957,18 @@ static int multiplication2(void) {
 			g2_mul(r, p, n);
 			TEST_ASSERT(g2_is_infty(r) == 1, end);
 		} TEST_END;
+
+		TEST_CASE("point multiplication by digit is correct") {
+			g2_mul_dig(r, p, 0);
+			TEST_ASSERT(g2_is_infty(r), end);
+			g2_mul_dig(r, p, 1);
+			TEST_ASSERT(g2_cmp(p, r) == RLC_EQ, end);
+			bn_rand(k, RLC_POS, RLC_DIG);
+			g2_mul(q, p, k);
+			g2_mul_dig(r, p, k->dp[0]);
+			TEST_ASSERT(g2_cmp(q, r) == RLC_EQ, end);
+		}
+		TEST_END;
 	}
 	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
@@ -1157,6 +1181,8 @@ static int validity2(void) {
 	return code;
 }
 
+#if FP_PRIME != 509
+
 static int hashing2(void) {
 	int code = RLC_ERR;
 	g2_t a;
@@ -1189,6 +1215,8 @@ static int hashing2(void) {
 	bn_free(n);
 	return code;
 }
+
+#endif
 
 static int memory(void) {
 	err_t e;
@@ -1469,6 +1497,14 @@ int exponentiation(void) {
 			gt_exp(b, b, e);
 			gt_mul(b, a, b);
 			TEST_ASSERT(gt_cmp(b, c) == RLC_EQ, end);
+			gt_exp_dig(b, a, 0);
+			TEST_ASSERT(gt_is_unity(b), end);
+			gt_exp_dig(b, a, 1);
+			TEST_ASSERT(gt_cmp(a, b) == RLC_EQ, end);
+			bn_rand(d, RLC_POS, RLC_DIG);
+			gt_exp(b, a, d);
+			gt_exp_dig(c, a, d->dp[0]);
+			TEST_ASSERT(gt_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 	}
 	RLC_CATCH_ANY {
@@ -1709,9 +1745,11 @@ int test2(void) {
 		return RLC_ERR;
 	}
 
+#if FP_PRIME != 509
 	if (hashing2() != RLC_OK) {
 		return RLC_ERR;
 	}
+#endif
 
 	return RLC_OK;
 }

@@ -1,6 +1,12 @@
-name: Continuous Integration
+name: Basic configuration (LABEL)
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - '**'         # all branches
+  pull_request:
+    branches:
+      - '**'         # all branches
 
 jobs:
   build:
@@ -42,10 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Linux Dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt install libgmp-dev
-
       - name: Set Windows enviroment
         if: ${{ (runner.os == 'Windows') && (matrix.config.cc == 'cl') }}
         uses: ilammy/msvc-dev-cmd@v1
@@ -68,7 +70,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DSEED= -DBENCH=0 -G "NMake Makefiles" ..
+          cmake -DLABEL=default -DSEED= -DBENCH=0 -G "NMake Makefiles" ..
 
       - name: Run CMake (MingW)
         if: ${{ (runner.os == 'Windows') && (matrix.config.cc == 'gcc') }}
@@ -76,7 +78,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DSEED= -DBENCH=0 -G "MinGW Makefiles" ..
+          cmake -DLABEL=default -DSEED= -DBENCH=0 -G "MinGW Makefiles" ..
 
       - name: Run CMake (standard)
         if: ${{ !(runner.os == 'Windows') }}

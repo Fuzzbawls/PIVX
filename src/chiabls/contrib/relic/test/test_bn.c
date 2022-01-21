@@ -180,12 +180,16 @@ static int util(void) {
 		TEST_END;
 
 		TEST_CASE("generating a random integer is consistent") {
-			bn_rand(b, RLC_POS, RLC_BN_BITS);
+			do {
+				bn_rand(b, RLC_POS, RLC_BN_BITS);
+			} while (bn_is_zero(b));
 			bn_rand_mod(a, b);
 			TEST_ASSERT(bn_sign(a) == bn_sign(b), end);
 			TEST_ASSERT(bn_is_zero(a) == 0, end);
 			TEST_ASSERT(bn_cmp(a, b) == RLC_LT, end);
-			bn_rand(b, RLC_NEG, RLC_DIG);
+			do {
+				bn_rand(b, RLC_NEG, RLC_DIG);
+			} while (bn_bits(b) <= 1);
 			bn_rand_mod(a, b);
 			TEST_ASSERT(bn_sign(a) == bn_sign(b), end);
 			TEST_ASSERT(bn_is_zero(a) == 0, end);
@@ -1305,7 +1309,7 @@ static int lcm(void) {
 }
 
 static int symbol(void) {
-	int code = RLC_ERR;
+	int r, code = RLC_ERR;
 	bn_t a, b, c, p, q;
 
 	bn_null(a);
@@ -1327,35 +1331,33 @@ static int symbol(void) {
 		} while (bn_is_even(p) || bn_is_even(q));
 
 		TEST_CASE("legendre symbol is correct") {
-			bn_smb_leg(c, p, p);
-			TEST_ASSERT(bn_is_zero(c) == 1, end);
+			TEST_ASSERT(bn_smb_leg(p, p) == 0, end);
 			bn_rand(a, RLC_POS, RLC_BN_BITS);
 			bn_sqr(a, a);
 			bn_mod(a, a, p);
-			bn_smb_leg(c, a, p);
-			TEST_ASSERT(bn_cmp_dig(c, 1) == RLC_EQ, end);
+			TEST_ASSERT(bn_smb_leg(a, p) == 1, end);
 			bn_rand(a, RLC_POS, RLC_BN_BITS);
-			bn_smb_leg(c, a, p);
-			bn_set_dig(a, 1);
-			TEST_ASSERT(bn_cmp_abs(c, a) == RLC_EQ, end);
+			r = bn_smb_leg(a, p);
+			TEST_ASSERT(r == 1 || r == -1, end);
 		} TEST_END;
 
 		TEST_CASE("legendre symbol is a homomorphism") {
 			bn_rand(a, RLC_POS, RLC_BN_BITS / 2);
 			bn_rand(b, RLC_POS, RLC_BN_BITS / 2);
 			bn_mul(c, a, b);
-			bn_smb_leg(a, a, p);
-			bn_smb_leg(b, b, p);
-			bn_smb_leg(c, c, p);
-			bn_mul(a, a, b);
-			TEST_ASSERT(bn_cmp(a, c) == RLC_EQ, end);
+			r = bn_smb_leg(a, p) * bn_smb_leg(b, p);
+			TEST_ASSERT(r == bn_smb_leg(c, p), end);
 		} TEST_END;
 
 		TEST_ONCE("legendre symbol satisfies quadratic reciprocity") {
 			/* Check the first supplement: (-1|p) = (-1)^(p-1)/2. */
 			bn_set_dig(a, 1);
 			bn_neg(a, a);
-			bn_smb_leg(b, a, p);
+			r = bn_smb_leg(a, p);
+			bn_set_dig(b, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(b, b);
+			}
 			bn_sub_dig(c, p, 1);
 			bn_rsh(c, c, 1);
 			if (bn_is_even(c)) {
@@ -1364,7 +1366,11 @@ static int symbol(void) {
 			TEST_ASSERT(bn_cmp(a, b) == RLC_EQ, end);
 			/* Check second supplement: (2|p) = (-1)^(p^2-1)/8. */
 			bn_set_dig(a, 2);
-			bn_smb_leg(b, a, p);
+			r = bn_smb_leg(a, p);
+			bn_set_dig(b, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(b, b);
+			}
 			bn_sqr(c, p);
 			bn_sub_dig(c, c, 1);
 			bn_rsh(c, c, 3);
@@ -1374,8 +1380,16 @@ static int symbol(void) {
 			}
 			TEST_ASSERT(bn_cmp(a, b) == RLC_EQ, end);
 			/* Check quadratic reciprocity law. */
-			bn_smb_leg(a, q, p);
-			bn_smb_leg(b, p, q);
+			r = bn_smb_leg(q, p);
+			bn_set_dig(a, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(a, a);
+			}
+			r = bn_smb_leg(p, q);
+			bn_set_dig(b, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(b, b);
+			}
 			bn_sub_dig(c, p, 1);
 			bn_rsh(c, c, 1);
 			if (!bn_is_even(c)) {
@@ -1390,9 +1404,7 @@ static int symbol(void) {
 
 		TEST_CASE("jacobi symbol is correct") {
 			bn_rand(a, RLC_POS, RLC_BN_BITS);
-			bn_smb_leg(c, a, p);
-			bn_smb_jac(b, a, p);
-			TEST_ASSERT(bn_cmp_abs(c, b) == RLC_EQ, end);
+			TEST_ASSERT(bn_smb_leg(a, p) == bn_smb_jac(a, p), end);
 		} TEST_END;
 
 		TEST_CASE("jacobi symbol is a homomorphism") {
@@ -1403,11 +1415,8 @@ static int symbol(void) {
 				bn_add_dig(p, p, 1);
 			}
 			bn_mul(c, a, b);
-			bn_smb_jac(a, a, p);
-			bn_smb_jac(b, b, p);
-			bn_smb_jac(c, c, p);
-			bn_mul(a, a, b);
-			TEST_ASSERT(bn_cmp(a, c) == RLC_EQ, end);
+			r = bn_smb_jac(a, p) * bn_smb_jac(b, p);
+			TEST_ASSERT(r == bn_smb_jac(c, p), end);
 		} TEST_END;
 
 		TEST_CASE("jacobi symbol is consistent with gcd") {
@@ -1416,13 +1425,16 @@ static int symbol(void) {
 			if (bn_is_even(p)) {
 				bn_add_dig(p, p, 1);
 			}
-			bn_smb_jac(c, a, p);
+			r = bn_smb_jac(a, p);
+			bn_set_dig(c, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(c, c);
+			}
 			bn_gcd(b, a, p);
 			if (bn_cmp_dig(b, 1) != RLC_EQ) {
-				TEST_ASSERT(bn_is_zero(c), end);
+				TEST_ASSERT(r == 0, end);
 			} else {
-				bn_set_dig(a, 1);
-				TEST_ASSERT(bn_cmp_abs(c, a) == RLC_EQ, end);
+				TEST_ASSERT(r == 1 || r == -1, end);
 			}
 		} TEST_END;
 
@@ -1438,7 +1450,11 @@ static int symbol(void) {
 			/* Check the first supplement: (-1|n) = (-1)^(n-1)/2. */
 			bn_set_dig(a, 1);
 			bn_neg(a, a);
-			bn_smb_jac(b, a, p);
+			r = bn_smb_jac(a, p);
+			bn_set_dig(b, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(b, b);
+			}
 			bn_sub_dig(c, p, 1);
 			bn_rsh(c, c, 1);
 			if (bn_is_even(c)) {
@@ -1447,7 +1463,11 @@ static int symbol(void) {
 			TEST_ASSERT(bn_cmp(a, b) == RLC_EQ, end);
 			/* Check second supplement: (2|p) = (-1)^(p^2-1)/8. */
 			bn_set_dig(a, 2);
-			bn_smb_jac(b, a, p);
+			r = bn_smb_jac(a, p);
+			bn_set_dig(b, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(b, b);
+			}
 			bn_sqr(c, p);
 			bn_sub_dig(c, c, 1);
 			bn_rsh(c, c, 3);
@@ -1457,8 +1477,16 @@ static int symbol(void) {
 			}
 			TEST_ASSERT(bn_cmp(a, b) == RLC_EQ, end);
 			/* Check quadratic reciprocity law. */
-			bn_smb_jac(a, p, q);
-			bn_smb_jac(b, q, p);
+			r = bn_smb_jac(p, q);
+			bn_set_dig(a, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(a, a);
+			}
+			r = bn_smb_jac(q, p);
+			bn_set_dig(b, (r < 0 ? -r : r));
+			if (r < 0) {
+				bn_neg(b, b);
+			}
 			bn_sub_dig(c, p, 1);
 			bn_rsh(c, c, 1);
 			if (!bn_is_even(c)) {
@@ -1738,16 +1766,20 @@ static int small_primes(void) {
 
 static int inversion(void) {
 	int code = RLC_ERR;
-	bn_t a, b, c;
+	bn_t a, b, c, d[2];
 
 	bn_null(a);
 	bn_null(b);
 	bn_null(c);
+	bn_null(d[0]);
+	bn_null(d[1]);
 
 	RLC_TRY {
 		bn_new(a);
 		bn_new(b);
 		bn_new(c);
+		bn_new(d[0]);
+		bn_new(d[1]);
 
 		bn_gen_prime(a, RLC_BN_BITS);
 
@@ -1757,6 +1789,17 @@ static int inversion(void) {
 			TEST_ASSERT(bn_cmp_dig(c, 1) != RLC_EQ, end);
 			bn_mul(c, b, c);
 			bn_mod(c, c, a);
+			TEST_ASSERT(bn_cmp_dig(c, 1) == RLC_EQ, end);
+			bn_rand_mod(b, a);
+			bn_rand_mod(c, a);
+			bn_copy(d[0], b);
+			bn_copy(d[1], c);
+			bn_mod_inv_sim(d, d, a, 2);
+			bn_mul(b, b, d[0]);
+			bn_mod(b, b, a);
+			bn_mul(c, c, d[1]);
+			bn_mod(c, c, a);
+			TEST_ASSERT(bn_cmp_dig(b, 1) == RLC_EQ, end);
 			TEST_ASSERT(bn_cmp_dig(c, 1) == RLC_EQ, end);
 		} TEST_END;
 	}
@@ -1768,6 +1811,8 @@ static int inversion(void) {
 	bn_free(a);
 	bn_free(b);
 	bn_free(c);
+	bn_free(d[0]);
+	bn_free(d[1]);
 	return code;
 }
 
@@ -1811,7 +1856,7 @@ static int recoding(void) {
 	bn_t a, b, c, v1[3], v2[3];
 	int w, k, l;
 	uint8_t d[RLC_BN_BITS + 1];
-	signed char e[2 * (RLC_BN_BITS + 1)];
+	int8_t e[2 * (RLC_BN_BITS + 1)];
 
 	bn_null(a);
 	bn_null(b);

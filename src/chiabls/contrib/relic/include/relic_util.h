@@ -116,6 +116,13 @@
 #define RLC_HIGH(D)				(D >> (RLC_DIG >> 1))
 
 /**
+ * Returns the sign bit of a digit.
+ *
+ * @param[in] D			- the digit.
+ */
+#define RLC_SIGN(D)				(((dig_t)D) >> (RLC_DIG - 1))
+
+/**
  * Selects between two values based on the value of a given flag.
  *
  * @param[in] A			- the first argument.
@@ -161,6 +168,68 @@
 #define _OPT(...)				RLC_ECHO(__OPT(__VA_ARGS__))
 #define __OPT(_1, _2, N, ...)	N
 /** @} */
+
+/**
+ * Generic macro to initialize an object to NULL.
+ *
+ * @param[out] A			- the object to initialize.
+ */
+#if ALLOC == AUTO
+#define RLC_NULL(A)			/* empty */
+#else
+#define RLC_NULL(A)			A = NULL;
+#endif
+
+
+/**
+ * Accumulates a double precision digit in a triple register variable.
+ *
+ * @param[in,out] R2		- most significant word of the triple register.
+ * @param[in,out] R1		- middle word of the triple register.
+ * @param[in,out] R0		- lowest significant word of the triple register.
+ * @param[in] A				- the first digit to multiply.
+ * @param[in] B				- the second digit to multiply.
+ */
+#define RLC_COMBA_STEP_MUL(R2, R1, R0, A, B)								\
+	dig_t _r, _r0, _r1;														\
+	RLC_MUL_DIG(_r1, _r0, A, B);											\
+	RLC_COMBA_ADD(_r, R2, R1, R0, _r0);										\
+	(R1) += _r1;															\
+	(R2) += (R1) < _r1;														\
+
+/**
+ * Computes the step of a Comba squaring.
+ *
+ * @param[in,out] R2		- most significant word of the triple register.
+ * @param[in,out] R1		- middle word of the triple register.
+ * @param[in,out] R0		- lowest significant word of the triple register.
+ * @param[in] A				- the first digit to multiply.
+ * @param[in] B				- the second digit to multiply.
+ */
+#define RLC_COMBA_STEP_SQR(R2, R1, R0, A, B)								\
+	dig_t _r, _r0, _r1;														\
+	RLC_MUL_DIG(_r1, _r0, A, B);											\
+	dig_t _s0 = _r0 + _r0;													\
+	dig_t _s1 = _r1 + _r1 + (_s0 < _r0);									\
+	RLC_COMBA_ADD(_r, R2, R1, R0, _s0);										\
+	(R1) += _s1;															\
+	(R2) += (R1) < _s1;														\
+	(R2) += (_s1 < _r1);													\
+
+/**
+ * Accumulates a single precision digit in a triple register variable.
+ *
+ * @param[in,out] T			- the temporary variable.
+ * @param[in,out] R2		- most significant word of the triple register.
+ * @param[in,out] R1		- middle word of the triple register.
+ * @param[in,out] R0		- lowest significant word of the triple register.
+ * @param[in] A				- the first digit to accumulate.
+ */
+#define RLC_COMBA_ADD(T, R2, R1, R0, A)										\
+	(T) = (R1);																\
+	(R0) += (A);															\
+	(R1) += (R0) < (A);														\
+	(R2) += (R1) < (T);														\
 
 /**
  * Selects a real or dummy printing function depending on library flags.
