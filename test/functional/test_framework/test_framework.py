@@ -1630,7 +1630,7 @@ class PivxTier2TestFramework(PivxTestFramework):
         self.minerPos = 4
         self.remoteDMN1Pos = 5
 
-        self.extra_args = [["-nuparams=v5_shield:249", "-nuparams=v6_evo:250", "-whitelist=127.0.0.1"]] * self.num_nodes
+        self.extra_args = [["-nuparams=v5_shield:249", "-nuparams=PIVX_v5.5:250", "-nuparams=v6_evo:250", "-whitelist=127.0.0.1"]] * self.num_nodes
         for i in [self.remoteOnePos, self.remoteTwoPos, self.remoteDMN1Pos]:
             self.extra_args[i] += ["-listen", "-externalip=127.0.0.1"]
         self.extra_args[self.minerPos].append("-sporkkey=932HEevBSujW2ud7RfB1YF91AFygbBRQj3de3LyaCRqNzKKgWXi")

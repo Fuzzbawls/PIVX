@@ -295,7 +295,7 @@ std::string GetRequiredPaymentsString(int nBlockHeight)
 bool CMasternodePayments::GetMasternodeTxOuts(const CBlockIndex* pindexPrev, std::vector<CTxOut>& voutMasternodePaymentsRet) const
 {
     if (deterministicMNManager->LegacyMNObsolete(pindexPrev->nHeight + 1)) {
-        CAmount masternodeReward = GetMasternodePayment();
+        CAmount masternodeReward = GetMasternodePayment(pindexPrev->nHeight + 1);
         auto dmnPayee = deterministicMNManager->GetListForBlock(pindexPrev).GetMNPayee();
         if (!dmnPayee) {
             return error("%s: Failed to get payees for block at height %d", __func__, pindexPrev->nHeight + 1);
@@ -334,7 +334,7 @@ bool CMasternodePayments::GetLegacyMasternodeTxOut(int nHeight, std::vector<CTxO
             return false;
         }
     }
-    voutMasternodePaymentsRet.emplace_back(GetMasternodePayment(), payee);
+    voutMasternodePaymentsRet.emplace_back(GetMasternodePayment(nHeight), payee);
     return true;
 }
 
@@ -582,7 +582,8 @@ bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     if (nMaxSignatures < MNPAYMENTS_SIGNATURES_REQUIRED) return true;
 
     std::string strPayeesPossible = "";
-    CAmount requiredMasternodePayment = GetMasternodePayment();
+    int nHeight = mnodeman.GetBestHeight();
+    CAmount requiredMasternodePayment = GetMasternodePayment(nHeight);
 
     for (CMasternodePayee& payee : vecPayments) {
         bool found = false;
@@ -836,7 +837,8 @@ bool IsCoinbaseValueValid(const CTransactionRef& tx, CAmount nBudgetAmt, CValida
             return true;
         } else {
             // regular block
-            CAmount nMnAmt = GetMasternodePayment();
+            int nHeight = mnodeman.GetBestHeight();
+            CAmount nMnAmt = GetMasternodePayment(nHeight);
             // if enforcement is disabled, there could be no masternode payment
             bool sporkEnforced = sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT);
             const std::string strError = strprintf("%s: invalid coinbase payment for masternode (%s vs expected=%s)",

@@ -808,8 +808,13 @@ double ConvertBitsToDouble(unsigned int nBits)
 
 CAmount GetBlockValue(int nHeight)
 {
-    // Fixed block value on regtest
+    // Set V5.5 upgrade block for regtest as well as testnet and mainnet
+    const int nLast = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_V5_5].nActivationHeight;
+
+    // Regtest block reward reduction schedule
     if (Params().IsRegTestNet()) {
+        // Reduce regtest block value after V5.5 upgrade
+        if (nHeight > nLast) return 10 * COIN;
         return 250 * COIN;
     }
     // Testnet high-inflation blocks [2, 200] with value 250k PIV
@@ -818,26 +823,31 @@ CAmount GetBlockValue(int nHeight)
         return 250000 * COIN;
     }
     // Mainnet/Testnet block reward reduction schedule
-    const int nLast = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_ZC_V2].nActivationHeight;
-    if (nHeight > nLast)   return 5    * COIN;
-    if (nHeight > 648000)  return 4.5  * COIN;
-    if (nHeight > 604800)  return 9    * COIN;
-    if (nHeight > 561600)  return 13.5 * COIN;
-    if (nHeight > 518400)  return 18   * COIN;
-    if (nHeight > 475200)  return 22.5 * COIN;
-    if (nHeight > 432000)  return 27   * COIN;
-    if (nHeight > 388800)  return 31.5 * COIN;
-    if (nHeight > 345600)  return 36   * COIN;
-    if (nHeight > 302400)  return 40.5 * COIN;
-    if (nHeight > 151200)  return 45   * COIN;
-    if (nHeight > 86400)   return 225  * COIN;
-    if (nHeight !=1)       return 250  * COIN;
+    const int nZerocoinV2 = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_ZC_V2].nActivationHeight;
+    if (nHeight > nLast) return 10 * COIN;
+    if (nHeight > nZerocoinV2) return 5 * COIN;
+    if (nHeight > 648000) return 4.5 * COIN;
+    if (nHeight > 604800) return 9 * COIN;
+    if (nHeight > 561600) return 13.5 * COIN;
+    if (nHeight > 518400) return 18 * COIN;
+    if (nHeight > 475200) return 22.5 * COIN;
+    if (nHeight > 432000) return 27 * COIN;
+    if (nHeight > 388800) return 31.5 * COIN;
+    if (nHeight > 345600) return 36 * COIN;
+    if (nHeight > 302400) return 40.5 * COIN;
+    if (nHeight > 151200) return 45 * COIN;
+    if (nHeight > 86400) return 225 * COIN;
+    if (nHeight != 1) return 250 * COIN;
     // Premine for 6 masternodes at block 1
     return 60001 * COIN;
 }
 
-int64_t GetMasternodePayment()
+int64_t GetMasternodePayment(int nHeight)
 {
+    if (nHeight > Params().GetConsensus().vUpgrades[Consensus::UPGRADE_V5_5].nActivationHeight) {
+        return Params().GetConsensus().nNewMNBlockReward;
+    }
+
     // Future: refactor function callers to use this line directly.
     return Params().GetConsensus().nMNBlockReward;
 }
@@ -2623,7 +2633,7 @@ bool CheckColdStakeFreeOutput(const CTransaction& tx, const int nHeight)
             // after v6.0, masternode and budgets are paid in the coinbase. No more free outputs allowed.
             return false;
         }
-        if (lastOut.nValue == GetMasternodePayment())
+        if (lastOut.nValue == GetMasternodePayment(nHeight))
             return true;
 
         // if mnsync is incomplete, we cannot verify if this is a budget block.
@@ -4175,13 +4185,13 @@ void static CheckBlockIndex()
 //       it was the one which was commented out
 int ActiveProtocol()
 {
-    // SPORK_14 was used for 70922 (v5.2.0), commented out now.
-    //if (sporkManager.IsSporkActive(SPORK_14_NEW_PROTOCOL_ENFORCEMENT))
-    //        return MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT;
-
-    // SPORK_15 is used for 70923 (v5.3.0)
-    if (sporkManager.IsSporkActive(SPORK_15_NEW_PROTOCOL_ENFORCEMENT_2))
+    // SPORK_14 is used for 70926 (v5.5.0), commented out now.
+    if (sporkManager.IsSporkActive(SPORK_14_NEW_PROTOCOL_ENFORCEMENT))
             return MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT;
+
+    // SPORK_15 is used for 70923 (v5.3.0), commented out now.
+    //if (sporkManager.IsSporkActive(SPORK_15_NEW_PROTOCOL_ENFORCEMENT_2))
+    //        return MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT;
 
     return MIN_PEER_PROTO_VERSION_BEFORE_ENFORCEMENT;
 }

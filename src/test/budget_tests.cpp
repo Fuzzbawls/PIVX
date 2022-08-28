@@ -42,6 +42,14 @@ void enableMnSyncAndSuperblocksPayment()
     BOOST_CHECK(sporkManager.IsSporkActive(SPORK_9_MASTERNODE_BUDGET_ENFORCEMENT));
 }
 
+BOOST_AUTO_TEST_CASE(masternode_value)
+{
+    SelectParams(CBaseChainParams::REGTEST);
+    int nHeightTest = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_V5_5].nActivationHeight + 1;
+    BOOST_CHECK_EQUAL(GetMasternodePayment(nHeightTest - 1), 3 * COIN);
+    BOOST_CHECK_EQUAL(GetMasternodePayment(nHeightTest), 6 * COIN);
+}
+
 BOOST_AUTO_TEST_CASE(budget_value)
 {
     SelectParams(CBaseChainParams::TESTNET);
@@ -52,6 +60,17 @@ BOOST_AUTO_TEST_CASE(budget_value)
     SelectParams(CBaseChainParams::MAIN);
     nHeightTest = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_ZC_V2].nActivationHeight + 1;
     CheckBudgetValue(nHeightTest, "mainnet", 43200*COIN);
+
+    SelectParams(CBaseChainParams::TESTNET);
+    nHeightTest = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_V5_5].nActivationHeight + 1;
+    CheckBudgetValue(nHeightTest-1, "testnet", 144*COIN);
+    CheckBudgetValue(nHeightTest, "testnet", 1440*COIN);
+
+    SelectParams(CBaseChainParams::MAIN);
+    nHeightTest = Params().GetConsensus().vUpgrades[Consensus::UPGRADE_V5_5].nActivationHeight + 1;
+    CheckBudgetValue(nHeightTest-1, "mainnet", 43200*COIN);
+    CheckBudgetValue(nHeightTest, "mainnet", 432000*COIN);
+
 }
 
 BOOST_FIXTURE_TEST_CASE(block_value, TestnetSetup)
@@ -341,7 +360,8 @@ static CMutableTransaction NewCoinBase(int nHeight, CAmount cbaseAmt, const CScr
 
 BOOST_FIXTURE_TEST_CASE(IsCoinbaseValueValid_test, TestingSetup)
 {
-    const CAmount mnAmt = GetMasternodePayment();
+    int nHeight = 100;
+    const CAmount mnAmt = GetMasternodePayment(nHeight);
     const CScript& cbaseScript = GetRandomP2PKH();
     CValidationState state;
 

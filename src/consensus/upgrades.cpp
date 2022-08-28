@@ -62,6 +62,10 @@ const struct NUInfo NetworkUpgradeInfo[Consensus::MAX_NETWORK_UPGRADES] = {
                 /*.strInfo =*/ "New staking rules",
         },
         {
+                /*.strName =*/ "PIVX_v5.5",
+                /*.strInfo =*/ "New rewards structure",
+        },
+        {
                 /*.strName =*/ "v6_evo",
                 /*.strInfo =*/ "Deterministic Masternodes",
         },
