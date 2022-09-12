@@ -280,7 +280,7 @@ jobs:
             unit_tests: true
             functional_tests: false
             goal: deploy
-            BITCOIN_CONFIG: "--with-gui=auto --enable-reduce-exports --disable-online-rust"
+            BITCOIN_CONFIG: "--with-gui=auto --enable-reduce-exports --disable-online-rust --disable-bench"
 
           - name: x86_64 Linux  [GOAL:install]  [focal]
             os: ubuntu-20.04
