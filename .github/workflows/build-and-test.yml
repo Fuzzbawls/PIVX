@@ -277,7 +277,7 @@ jobs:
             os: ubuntu-20.04
             host: x86_64-w64-mingw32
             apt_get: python3 nsis g++-mingw-w64-x86-64 wine-binfmt wine64
-            unit_tests: true
+            unit_tests: false
             functional_tests: false
             goal: deploy
             BITCOIN_CONFIG: "--with-gui=auto --enable-reduce-exports --disable-online-rust --disable-bench"
