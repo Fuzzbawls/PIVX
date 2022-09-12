@@ -232,7 +232,6 @@ set(SERVER_SOURCES
         ./src/indirectmap.h
         ./src/init.cpp
         ./src/tiertwo/init.cpp
-        ./src/interfaces/handler.cpp
         ./src/interfaces/wallet.cpp
         ./src/dbwrapper.cpp
         ./src/legacy/validation_zerocoin_legacy.cpp
@@ -482,6 +481,7 @@ set(UTIL_SOURCES
         ./src/chainparamsbase.cpp
         ./src/clientversion.cpp
         ./src/fs.cpp
+        ./src/interfaces/handler.cpp
         ./src/logging.cpp
         ./src/random.cpp
         ./src/randomenv.cpp
@@ -493,6 +493,7 @@ set(UTIL_SOURCES
         ./src/util/asmap.cpp
         ./src/util/threadnames.cpp
         ./src/util/blockstatecatcher.h
+        ./src/util/string.cpp
         ./src/util/system.cpp
         ./src/util/validation.cpp
         ./src/utilstrencodings.cpp
