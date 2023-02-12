@@ -85,7 +85,7 @@ find_package(GMP REQUIRED)
 find_package(ZMQ)
 find_package(Miniupnp)
 find_package(NAT-PMP)
-find_package(Boost COMPONENTS system filesystem thread REQUIRED)
+find_package(Boost COMPONENTS system filesystem chrono thread REQUIRED)
 find_package(Sodium REQUIRED)
 
 # run autogen.sh if missing header files from configure on Linux/Mac
