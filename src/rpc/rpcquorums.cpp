@@ -5,14 +5,139 @@
 
 #include "activemasternode.h"
 #include "chainparams.h"
+#include "llmq/quorums.h"
 #include "llmq/quorums_blockprocessor.h"
 #include "llmq/quorums_commitment.h"
-#include "llmq/quorums_dkgsession.h"
 #include "llmq/quorums_debug.h"
-#include "llmq/quorums_utils.h"
-#include "net.h"
+#include "llmq/quorums_dkgsession.h"
 #include "rpc/server.h"
 #include "validation.h"
+
+#include <string>
+
+UniValue listquorums(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 1) {
+        throw std::runtime_error(
+            "listquorums ( count )\n"
+            "\nArguments:\n"
+            "1. count           (numeric, optional, default=10) Number of quorums to list\n"
+
+            "\nResult:\n"
+            "{\n"
+            "  \"llmqType\": [      (array of string) A json array of quorum hashes for a given llmqType\n"
+            "    \"quorumhash\",    (string) Block hash of the quorum\n"
+            "    ...\n"
+            "  ],\n"
+            "  ...\n"
+            "}\n"
+
+            "\nExample:\n" +
+            HelpExampleRpc("listquorums", "1") + HelpExampleCli("listquorums", "1"));
+    }
+
+    LOCK(cs_main);
+    int count = 10;
+    if(request.params.size() == 1) {
+        count = request.params[0].get_int();
+        if(count <= 0) {
+            throw std::runtime_error(
+            "count cannot be 0 or negative!\n");
+        }
+    }
+    UniValue ret(UniValue::VOBJ);
+
+    for (auto& p : Params().GetConsensus().llmqs) {
+        UniValue v(UniValue::VARR);
+
+        auto quorums = llmq::quorumManager->ScanQuorums(p.first, chainActive.Tip()->GetBlockHash(), count);
+        for (auto& q : quorums) {
+            v.push_back(q->pindexQuorum->GetBlockHash().ToString());
+        }
+
+        ret.pushKV(p.second.name, v);
+    }
+
+
+    return ret;
+}
+
+UniValue getquoruminfo(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 3 || request.params.size() < 2)
+        throw std::runtime_error(
+            "getquoruminfo llmqType \"quorumHash\" ( includeSkShare )\n"
+            "\nArguments:\n"
+            "1. llmqType              (numeric, required) LLMQ type.\n"
+            "2. \"quorumHash\"          (string, required) Block hash of quorum.\n"
+            "3. includeSkShare        (boolean, optional) Include secret key share in output.\n"
+
+            "\nResult:\n"
+            "{\n"
+            "  \"height\": n,                     (numeric) The starting block height of the quorum\n"
+            "  \"quorumHash\": \"quorumHash\",      (string) Block hash of the quorum\n"
+            "  \"members\": [                     (array of json objects)\n"
+            "     {\n"
+            "       \"proTxHash\": \"proTxHash\"    (string) ProTxHash of the quorum member\n"
+            "       \"valid\": true/false         (boolean) True/false if the member is valid/invalid\n"
+            "       \"pubKeyShare\": pubKeyShare  (string) Quorum public key share of the member, will be outputed only if the command is performed by another quorum member or watcher\n"
+            "     },\n"
+            "     ...\n"
+            "   ],\n"
+            "   \"quorumPublicKey\": quorumPublicKey,   (string) Public key of the quorum\n"
+            "   \"secretKeyShare\": secretKeyShare      (string) This is outputed only if includeSkShare=true and the command is performed by a valid member of the quorum. It corresponds to the secret key share of that member\n"
+            "}\n"
+
+            "\nExample:\n" +
+            HelpExampleRpc("getquoruminfo", "2 \"xxx\", true") + HelpExampleCli("getquoruminfo", "2, \"xxx\",true"));
+
+    LOCK(cs_main);
+
+    Consensus::LLMQType llmqType = static_cast<Consensus::LLMQType>(request.params[0].get_int());
+    if (!Params().GetConsensus().llmqs.count(llmqType)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid llmqType");
+    }
+
+    uint256 blockHash = ParseHashV(request.params[1], "quorumHash");
+    bool includeSkShare = false;
+    if (request.params.size() > 2) {
+        includeSkShare = request.params[2].get_bool();
+    }
+
+    auto quorum = llmq::quorumManager->GetQuorum(llmqType, blockHash);
+    if (!quorum) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "quorum not found");
+    }
+
+    UniValue ret(UniValue::VOBJ);
+
+    ret.pushKV("height", quorum->pindexQuorum->nHeight);
+    ret.pushKV("quorumHash", quorum->pindexQuorum->GetBlockHash().ToString());
+
+    UniValue membersArr(UniValue::VARR);
+    for (size_t i = 0; i < quorum->members.size(); i++) {
+        auto& dmn = quorum->members[i];
+        UniValue mo(UniValue::VOBJ);
+        mo.pushKV("proTxHash", dmn->proTxHash.ToString());
+        mo.pushKV("valid", quorum->validMembers[i]);
+        if (quorum->validMembers[i]) {
+            CBLSPublicKey pubKey = quorum->GetPubKeyShare(i);
+            if (pubKey.IsValid()) {
+                mo.pushKV("pubKeyShare", pubKey.ToString());
+            }
+        }
+        membersArr.push_back(mo);
+    }
+
+    ret.pushKV("members", membersArr);
+    ret.pushKV("quorumPublicKey", quorum->quorumPublicKey.ToString());
+    CBLSSecretKey skShare = quorum->GetSkShare();
+    if (includeSkShare && skShare.IsValid()) {
+        ret.pushKV("secretKeyShare", skShare.ToString());
+    }
+
+    return ret;
+}
 
 UniValue getminedcommitment(const JSONRPCRequest& request)
 {
@@ -29,7 +154,7 @@ UniValue getminedcommitment(const JSONRPCRequest& request)
         );
     }
 
-    Consensus::LLMQType llmq_type = (Consensus::LLMQType) request.params[0].get_int();
+    Consensus::LLMQType llmq_type = static_cast<Consensus::LLMQType>(request.params[0].get_int());
     if (!Params().GetConsensus().llmqs.count(llmq_type)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid llmq_type");
     }
@@ -65,7 +190,7 @@ UniValue getquorummembers(const JSONRPCRequest& request)
         );
     }
 
-    Consensus::LLMQType llmq_type = (Consensus::LLMQType) request.params[0].get_int();
+    Consensus::LLMQType llmq_type = static_cast<Consensus::LLMQType>(request.params[0].get_int());
     if (!Params().GetConsensus().llmqs.count(llmq_type)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid llmq_type");
     }
@@ -170,7 +295,9 @@ static const CRPCCommand commands[] =
     { "evo",         "getquorummembers",       &getquorummembers,    true,  {"llmq_type", "quorum_hash"}  },
     { "evo",         "quorumdkgsimerror",      &quorumdkgsimerror,   true,  {"error_type", "rate"}  },
     { "evo",         "quorumdkgstatus",        &quorumdkgstatus,     true,  {"detail_level"}  },
-};
+    { "evo",         "listquorums",            &listquorums,         true,  {"count"}  },
+    { "evo",         "getquoruminfo",          &getquoruminfo,       true,  {"llmqType", "quorumHash", "includeSkShare"}  },
+ };
 
 void RegisterQuorumsRPCCommands(CRPCTable& tableRPC)
 {
