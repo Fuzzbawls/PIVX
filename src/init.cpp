@@ -1034,11 +1034,29 @@ bool AppInitParameterInteraction()
     // Check level must be 4 for zerocoin checks
     if (gArgs.IsArgSet("-checklevel"))
         return UIError(strprintf(_("Error: Unsupported argument %s found. Checklevel must be level 4."), "-checklevel"));
-    // Exit early if -masternode=1 and -listen=0
-    if (gArgs.GetBoolArg("-masternode", DEFAULT_MASTERNODE) && !gArgs.GetBoolArg("-listen", DEFAULT_LISTEN))
-        return UIError(strprintf(_("Error: %s must be true if %s is set."), "-listen", "-masternode"));
     if (gArgs.GetBoolArg("-benchmark", false))
         UIWarning(strprintf(_("Warning: Unsupported argument %s ignored, use %s"), "-benchmark", "-debug=bench."));
+
+    // Exit early if -masternode=1 and invalid/incomplete MN config options
+    if (gArgs.GetBoolArg("-masternode", DEFAULT_MASTERNODE)) {
+        // -masternodeaddr and -masternodeprivkey must be set
+        if (!gArgs.IsArgSet("-masternodeaddr") || !gArgs.IsArgSet("-masternodeprivkey")) {
+            return UIError(strprintf(_("Error: %s and %s must be set if %s is set."), "-masternodeadr", "-masternodeprivkey", "-masternode"));
+        } else {
+            // Determine if this MN is a TOR MN or not
+            bool isOnionMn = false;
+            std::string mnAddr = gArgs.GetArg("-masternodeaddr", "");
+            if (mnAddr.find(".onion") != std::string::npos)
+                isOnionMn = true;
+
+            if (!gArgs.GetBoolArg("-listen", DEFAULT_LISTEN)) {
+                if (!isOnionMn)
+                    return UIError(strprintf(_("Error: %s must be true if %s is set."), "-listen", "-masternode"));
+                if (isOnionMn && !gArgs.GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
+                    return UIError(strprintf(_("Error: %s must be true if %s is set."), "-listenonion", "-masternode"));
+            }
+        }
+    }
 
     // Checkmempool and checkblockindex default to true in regtest mode
     int ratio = std::min<int>(
