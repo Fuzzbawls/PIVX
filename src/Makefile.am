@@ -191,6 +191,7 @@ BITCOIN_CORE_H = \
   evo/providertx.h \
   evo/specialtx_validation.h \
   flatdb.h \
+  llmq/quorums.h \
   llmq/quorums_blockprocessor.h \
   llmq/quorums_commitment.h \
   llmq/quorums_connections.h \
@@ -367,6 +368,7 @@ libbitcoin_server_a_SOURCES = \
   evo/mnauth.cpp \
   evo/providertx.cpp \
   evo/specialtx_validation.cpp \
+  llmq/quorums.cpp \
   llmq/quorums_blockprocessor.cpp \
   llmq/quorums_commitment.cpp \
   llmq/quorums_connections.cpp \

@@ -34,6 +34,9 @@ public:
                         const uint256& quorumHash,
                         const std::set<uint256>& proTxHashes);
 
+    // Return quorum nodes for a given llmqType
+    std::set<uint256> getQuorumNodes(Consensus::LLMQType llmqType);
+
     // Return true if the quorum was already registered
     bool hasQuorumNodes(Consensus::LLMQType llmqType, const uint256& quorumHash);
 

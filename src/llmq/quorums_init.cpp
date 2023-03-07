@@ -6,6 +6,7 @@
 #include "llmq/quorums_init.h"
 
 #include "bls/bls_worker.h"
+#include "llmq/quorums.h"
 #include "llmq/quorums_blockprocessor.h"
 #include "llmq/quorums_commitment.h"
 #include "llmq/quorums_debug.h"
@@ -24,6 +25,7 @@ void InitLLMQSystem(CEvoDB& evoDb)
     quorumDKGDebugManager.reset(new CDKGDebugManager());
     quorumBlockProcessor.reset(new CQuorumBlockProcessor(evoDb));
     quorumDKGSessionManager.reset(new CDKGSessionManager(evoDb, *blsWorker));
+    quorumManager.reset(new CQuorumManager(evoDb, *blsWorker, *quorumDKGSessionManager));
 }
 
 void DestroyLLMQSystem()
@@ -31,6 +33,7 @@ void DestroyLLMQSystem()
     quorumDKGSessionManager.reset();
     quorumBlockProcessor.reset();
     quorumDKGDebugManager.reset();
+    quorumManager.reset();
     delete blsWorker;
     blsWorker = nullptr;
 }
