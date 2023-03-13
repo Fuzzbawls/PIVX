@@ -162,6 +162,15 @@ jobs:
             goal: install
             BITCOIN_CONFIG: "--enable-zmq --enable-debug --with-incompatible-bdb --with-gui=qt5 CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'"
 
+          - name: x64-Linux-cpp17
+            id: Linux-x86_64-nodepends-cpp17
+            os: ubuntu-20.04
+            apt_get: python3-zmq qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev libqrencode-dev libgmp-dev libsodium-dev cargo
+            unit_tests: true
+            functional_tests: true
+            goal: install
+            BITCOIN_CONFIG: "--enable-zmq --with-incompatible-bdb --with-gui=qt5 --enable-c++17 CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'"
+
           - name: x64-Linux-latest
             id: Linux-x86_64-nodepends-latest
             os: ubuntu-latest
