@@ -23,10 +23,21 @@ endif()
 
 project(PIVX)
 
+# Option to compile with c++17 support. append `-DC++17=ON` to your cmake command
+# Ex: `cmake -DC++17=ON ..`
+option(C++17 "Use C++17 compiler mode" OFF)
+if(C++17)
+    message(STATUS "Using C++17")
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++17 ")
+else()
+    message(STATUS "Using C++14")
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++14 ")
+endif()
+
 set(BDB_VER "4.8.30")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/contrib/cmake")
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++14 ")
 include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
