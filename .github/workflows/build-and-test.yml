@@ -145,7 +145,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - name: x64-Linux [GOAL:install] [native linux using syslibs]
+          - name: x64-Linux
             id: Linux-x86_64-nodepends
             os: ubuntu-20.04
             host: x86_64-unknown-linux-gnu
@@ -155,7 +155,7 @@ jobs:
             goal: install
             BITCOIN_CONFIG: "--enable-zmq --with-incompatible-bdb --with-gui=qt5 CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'"
 
-          - name: x64-macOS [GOAL:deploy] [native macOS using syslibs]
+          - name: x64-macOS-11
             id: macOS11-nodepends
             os: macos-11
             host: x86_64-apple-darwin20.6.0
