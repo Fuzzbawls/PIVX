@@ -400,6 +400,7 @@ jobs:
             apt_get: python3 g++-arm-linux-gnueabihf
             unit_tests: false
             functional_tests: false
+            symbol_check: true
             goal: install
             # -Wno-psabi is to disable ABI warnings: "note: parameter passing for argument of type ... changed in GCC 7.1"
             # This could be removed once the ABI change warning does not show up by default
@@ -412,6 +413,7 @@ jobs:
             apt_get: python3 g++-aarch64-linux-gnu
             unit_tests: false
             functional_tests: false
+            symbol_check: true
             goal: install
             BITCOIN_CONFIG: "--with-gui=qt5 --enable-glibc-back-compat --enable-reduce-exports --disable-online-rust"
 
@@ -433,6 +435,7 @@ jobs:
             apt_get: python3-zmq
             unit_tests: true
             functional_tests: true
+            symbol_check: true
             goal: install
             test_runner_extra: "--coverage --all  --exclude feature_dbcrash"
             BITCOIN_CONFIG: "--enable-zmq --with-gui=qt5 --enable-glibc-back-compat --enable-reduce-exports --disable-online-rust"
@@ -444,6 +447,7 @@ jobs:
             apt_get: python3-zmq
             unit_tests: false
             functional_tests: true
+            symbol_check: true
             goal: install
             test_runner_extra: "--legacywallet"
             BITCOIN_CONFIG: "--enable-zmq --with-gui=no --enable-glibc-back-compat --enable-reduce-exports --disable-online-rust"
