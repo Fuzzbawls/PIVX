@@ -114,6 +114,7 @@ jobs:
             sudo apt-get install --no-install-recommends --no-upgrade -qq "$APT_BASE" ${{ matrix.config.packages }}
           fi
           if [[ ${{ matrix.config.os }} = macos* ]]; then
+            brew update
             brew install "$APT_BASE" ${{ matrix.config.packages }}
             # GA's macOS 11 image is inconsistent as to if it includes a pre-installed version of boost. Force linking
             # to the specified version (1.76), which will overwrite the symlinks to a pre-existing version if it exists.
@@ -219,6 +220,7 @@ jobs:
             sudo apt-get install --no-install-recommends --no-upgrade -qq "$APT_BASE" ${{ matrix.config.apt_get }}
           fi
           if [[ ${{ matrix.config.os }} = macos* ]]; then
+            brew update
             brew install ${{ matrix.config.brew_install }}
             pip3.8 install ds_store mac_alias
           fi
