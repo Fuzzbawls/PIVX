@@ -77,13 +77,13 @@ jobs:
         config:
           - name: Linux
             os: ubuntu-20.04
-            packages: python3-zmq qttools5-dev qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libgmp-dev libsodium-dev cargo
+            packages: python3-zmq qttools5-dev qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev libqrencode-dev libgmp-dev libsodium-dev cargo
             cc: gcc
             cxx: g++
 
           - name: Linux-latest
             os: ubuntu-latest
-            packages: python3-zmq qttools5-dev qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libgmp-dev libsodium-dev cargo
+            packages: python3-zmq qttools5-dev qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev libqrencode-dev libgmp-dev libsodium-dev cargo
             cc: gcc
             cxx: g++
 
@@ -121,7 +121,7 @@ jobs:
               brew update
               brew link --overwrite -f boost@1.76
             fi
-            brew install --fetch-HEAD miniupnpc
+            brew install -s --fetch-HEAD miniupnpc
           fi
 
       - name: ccache cache files
@@ -222,6 +222,9 @@ jobs:
           fi
           if [[ ${{ matrix.config.os }} = macos* ]]; then
             brew install ${{ matrix.config.brew_install }}
+            if [ "${{ matrix.config.os }}" = "macos-11" ]; then
+              brew update
+            fi
             brew install --fetch-HEAD miniupnpc
             pip3.8 install ds_store mac_alias
           fi
