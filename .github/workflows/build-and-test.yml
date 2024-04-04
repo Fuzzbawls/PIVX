@@ -89,7 +89,7 @@ jobs:
 
           - name: macOS
             os: macos-11
-            packages: llvm@12 python@3.8 autoconf automake berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config libevent qrencode gmp libsodium rust
+            packages: llvm@12 autoconf automake ccache berkeley-db@4 libtool boost@1.76 libnatpmp pkg-config python@3.8 zmq libevent qrencode gmp libsodium rust
             no_qt: true
             boost_root: true
             cc: $(brew --prefix llvm@12)/bin/clang
@@ -97,7 +97,7 @@ jobs:
 
           - name: macOS-latest
             os: macos-latest
-            packages: llvm@13 python@3.8 autoconf automake berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium rust
+            packages: llvm@13 autoconf automake ccache berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config python@3.8 qt@5 zmq libevent qrencode gmp libsodium rust librsvg
             boost_root: true
             cc: $(brew --prefix llvm@13)/bin/clang
             cxx: $(brew --prefix llvm@13)/bin/clang++
@@ -114,8 +114,8 @@ jobs:
             sudo apt-get install --no-install-recommends --no-upgrade -qq "$APT_BASE" ${{ matrix.config.packages }}
           fi
           if [[ ${{ matrix.config.os }} = macos* ]]; then
-            brew update
-            brew install "$APT_BASE" ${{ matrix.config.packages }}
+            brew install ${{ matrix.config.packages }}
+            brew install --fetch-HEAD miniupnpc
             # GA's macOS 11 image is inconsistent as to if it includes a pre-installed version of boost. Force linking
             # to the specified version (1.76), which will overwrite the symlinks to a pre-existing version if it exists.
             if [ "${{ matrix.config.os }}" = "macos-11" ]; then
@@ -190,7 +190,7 @@ jobs:
           - name: x64-macOS
             id: macOS-nodepends
             os: macos-11
-            brew_install: autoconf automake ccache berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config python@3.8 libevent qrencode gmp libsodium rust librsvg
+            brew_install: autoconf automake ccache berkeley-db@4 libtool boost@1.76 libnatpmp pkg-config python@3.8 libevent qrencode gmp libsodium rust librsvg
             unit_tests: true
             functional_tests: true
             cc: clang
@@ -200,7 +200,7 @@ jobs:
           - name: x64-macOS-latest
             id: macOS-nodepends-latest
             os: macos-latest
-            brew_install: autoconf automake ccache berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config python@3.8 qt@5 zmq libevent qrencode gmp libsodium rust librsvg
+            brew_install: autoconf automake ccache berkeley-db@4 libtool boost@1.76 libnatpmp pkg-config python@3.8 qt@5 zmq libevent qrencode gmp libsodium rust librsvg
             unit_tests: true
             functional_tests: true
             goal: deploy
@@ -220,8 +220,8 @@ jobs:
             sudo apt-get install --no-install-recommends --no-upgrade -qq "$APT_BASE" ${{ matrix.config.apt_get }}
           fi
           if [[ ${{ matrix.config.os }} = macos* ]]; then
-            brew update
             brew install ${{ matrix.config.brew_install }}
+            brew install --fetch-HEAD miniupnpc
             pip3.8 install ds_store mac_alias
           fi
 
