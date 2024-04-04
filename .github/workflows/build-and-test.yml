@@ -97,7 +97,7 @@ jobs:
 
           - name: macOS-latest
             os: macos-latest
-            packages: llvm@13 autoconf automake ccache berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config python@3.8 qt@5 zmq libevent qrencode gmp libsodium rust librsvg
+            packages: llvm@13 autoconf automake ccache berkeley-db@4 libtool boost@1.76 libnatpmp pkg-config python@3.8 qt@5 zmq libevent qrencode gmp libsodium rust librsvg
             boost_root: true
             cc: $(brew --prefix llvm@13)/bin/clang
             cxx: $(brew --prefix llvm@13)/bin/clang++
@@ -115,12 +115,13 @@ jobs:
           fi
           if [[ ${{ matrix.config.os }} = macos* ]]; then
             brew install ${{ matrix.config.packages }}
-            brew install --fetch-HEAD miniupnpc
             # GA's macOS 11 image is inconsistent as to if it includes a pre-installed version of boost. Force linking
             # to the specified version (1.76), which will overwrite the symlinks to a pre-existing version if it exists.
             if [ "${{ matrix.config.os }}" = "macos-11" ]; then
+              brew update
               brew link --overwrite -f boost@1.76
             fi
+            brew install --fetch-HEAD miniupnpc
           fi
 
       - name: ccache cache files
