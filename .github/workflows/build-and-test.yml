@@ -705,26 +705,32 @@ jobs:
             id: Linux-x86_64-tests
             os: ubuntu-20.04
             host: x86_64-unknown-linux-gnu
-            apt_get: python3-zmq
+            packages: python3-zmq
             test_runner_extra: "--coverage --all --exclude feature_dbcrash"
 
           - name: x86_64 Linux [Only functional tests on legacy pre-HD wallets]
             id: Linux-x86_64-legacy-tests
             os: ubuntu-20.04
             host: x86_64-unknown-linux-gnu
-            apt_get: python3-zmq
+            packages: python3-zmq
             test_runner_extra: "--legacywallet"
 
           - name: x86_64 macOS [Full Functional Tests]
             id: macos-x86_64-tests
             os: macos-12
             host: x86_64-apple-darwin16
+            packages: python@3.8
             test_runner_extra: "--coverage --all --exclude feature_dbcrash"
 
     steps:
       - name: Setup Environment
-        if: matrix.config.host != 'x86_64-apple-darwin16'
-        run: sudo apt-get install --no-install-recommends --no-upgrade -qq ${{ matrix.config.apt_get }}
+        run: |
+          if [[ ${{ matrix.config.os }} = ubuntu* ]]; then
+            sudo apt-get install --no-install-recommends --no-upgrade -qq ${{ matrix.config.packages }}
+          fi
+          if [[ ${{ matrix.config.os }} = macos* ]]; then
+            brew install ${{ matrix.config.packages }}
+          fi
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
