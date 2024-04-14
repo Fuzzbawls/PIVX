@@ -1,7 +1,14 @@
+# Copyright (c) 2020-2024 The PIVX Core developers
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 name: CI Actions for PIVX
 
 on: [push, pull_request]
 jobs:
+
+  # Pre-build linting job. This runs various lint tests.
+  # Any failures here will halt the rest of the workflow.
   lint:
     env:
       SHELLCHECK_VERSION: v0.7.1
@@ -39,25 +46,34 @@ jobs:
       - name: Lint
         run: |
           export PATH="/tmp/shellcheck-${SHELLCHECK_VERSION}:${PATH}"
-          echo $PATH
-
           git checkout -qf -B master refs/remotes/origin/master
           git checkout -qf $GITHUB_SHA
+
+          # Ensure git subtrees are not directly modified in-tree.
           test/lint/git-subtree-check.sh src/secp256k1
           test/lint/git-subtree-check.sh src/univalue
           test/lint/git-subtree-check.sh src/leveldb
           test/lint/git-subtree-check.sh src/crc32c
           test/lint/git-subtree-check.sh src/chiabls
           test/lint/git-subtree-check.sh src/immer
+
+          # Check command line argument documentation is present.
           test/lint/check-doc.py
+
+          # Ensure that all logprint(f) calls have the appropriate number of arguments.
           test/lint/logprint-scanner.py
+
+          # Run the remainder of lint tests in `test/lint/`.
           test/lint/lint-all.sh
 
+          # Verify that scripted diffs are deterministically reproducable.
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             COMMIT_RANGE="${{ github.base_ref }}..HEAD"
             test/lint/commit-script-check.sh $COMMIT_RANGE
           fi
 
+  # CMake build jobs to ensure building with CMake remains viable.
+  # Currently this only supports native linux and macOS.
   cmake:
     name: CMake-${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -89,8 +105,7 @@ jobs:
 
           - name: macOS
             os: macos-12
-            packages: llvm@13 python@3.8 autoconf automake berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config libevent qrencode gmp libsodium rust
-            no_qt: true
+            packages: llvm@13 python@3.8 autoconf automake berkeley-db@4 libtool boost@1.76 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium rust
             boost_root: true
             cc: $(brew --prefix llvm@13)/bin/clang
             cxx: $(brew --prefix llvm@13)/bin/clang++
@@ -151,6 +166,8 @@ jobs:
           cd ${{ github.workspace }}/cmake-build-debug
           cmake --build ${{ github.workspace }}/cmake-build-debug --target all -- -j 2
 
+  # Autotools based build job for native linux and macOS.
+  # These builds use system/distro packages to satisfy dependencies.
   build_native_wallet:
     name: Native-${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -307,6 +324,8 @@ jobs:
           path: native-${{ matrix.config.os }}-built.tar
           retention-days: 5
 
+  # Job to run the python functional test suite for native linux and macOS builds.
+  # Uses a build artifact from the previous job to provide pivxd/pivx-cli and the test suite files.
   test_native_wallet:
     name: Native-${{ matrix.config.name }}-tests
     runs-on: ${{ matrix.config.os }}
@@ -368,6 +387,8 @@ jobs:
           cd build/pivx-${{ matrix.config.os }}/
           test/functional/test_runner.py --combinedlogslen=4000 ${{ matrix.config.test_runner_extra }}
 
+  # Job to compile all dependencies deterministically using the depends build system.
+  # Results are cached for repeat use across workflow runs.
   build_depends:
     name: Depends-${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -461,6 +482,8 @@ jobs:
             make -j2 -C depends HOST=${{ matrix.config.host }} ${{ matrix.config.dep_opts }}
           fi
 
+  # Autotools based build job for depends based builds.
+  # These builds use cached depends results to satisfy dependencies.
   build_depends_wallet:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -531,7 +554,7 @@ jobs:
             XCODE_VERSION: 11.3.1
             XCODE_BUILD_ID: 11C505
             unit_tests: false
-            functional_tests: false
+            functional_tests: true
             symbol_check: true
             goal: deploy
             BITCOIN_CONFIG: "--enable-gui --enable-reduce-exports --enable-werror --disable-online-rust"
@@ -621,20 +644,18 @@ jobs:
       - name: Build Wallet
         run: |
           cd build/pivx-${{ matrix.config.host }}/
-
-          echo ::group::Build
           make -j2 ${{ matrix.config.goal }} || ( echo "Build failure. Verbose build follows." && make ${{ matrix.config.goal }} V=1 ; false )
-          echo ::endgroup::
 
-          echo ::group::Security-Check
+      - name: Check Security
+        run: |
+          cd build/pivx-${{ matrix.config.host }}/
           make -j2 -C src check-security
-          echo ::endgroup::
 
-          if [ "${{matrix.config.symbol_check }}" = "true" ]; then
-            echo ::group::Symbol-Check
-            make -j2 -C src check-symbols
-            echo ::endgroup::
-          fi
+      - name: Check Exported Symbols
+        if: matrix.config.symbol_check == true
+        run: |
+          cd build/pivx-${{ matrix.config.host }}/
+          make -j2 -C src check-symbols
 
       - name: Run Unit Tests
         if: matrix.config.unit_tests == true
@@ -663,6 +684,8 @@ jobs:
           path: ${{ matrix.config.host }}-built.tar
           retention-days: 5
 
+  # Job to run the python functional test suite for depends based linux builds.
+  # Uses a build artifact from the previous job to provide pivxd/pivx-cli and the test suite files.
   test_depends_wallet:
     name: Test-Depends-${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -681,19 +704,24 @@ jobs:
             os: ubuntu-20.04
             host: x86_64-unknown-linux-gnu
             apt_get: python3-zmq
-            functional_tests: true
             test_runner_extra: "--coverage --all --exclude feature_dbcrash"
 
           - name: x86_64 Linux [Only functional tests on legacy pre-HD wallets]
-            id: Linux-x86_64-tests
+            id: Linux-x86_64-legacy-tests
             os: ubuntu-20.04
             host: x86_64-unknown-linux-gnu
             apt_get: python3-zmq
-            functional_tests: true
             test_runner_extra: "--legacywallet"
+
+          - name: x86_64 macOS [Full Functional Tests]
+            id: macos-x86_64-tests
+            os: macos-12
+            host: x86_64-apple-darwin16
+            test_runner_extra: "--coverage --all --exclude feature_dbcrash"
 
     steps:
       - name: Setup Environment
+        if: ${{ matrix.config.os }} = ubuntu*
         run: sudo apt-get install --no-install-recommends --no-upgrade -qq ${{ matrix.config.apt_get }}
 
       - name: Download Build Artifact
@@ -710,7 +738,6 @@ jobs:
           ./install-params.sh $PARAMS_DIR
 
       - name: Run Functional Tests
-        if: matrix.config.functional_tests == true
         run: |
           cd build/pivx-${{ matrix.config.host }}/
           test/functional/test_runner.py --combinedlogslen=4000 ${{ matrix.config.test_runner_extra }}
