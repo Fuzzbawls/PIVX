@@ -749,6 +749,6 @@ jobs:
         run: |
           cd build/pivx-${{ matrix.config.host }}/
           if [[ ${{ matrix.config.os }} = macos* ]]; then
-            sed -i.old 's/home/Users' test/functional/config.ini
+            sed -i.old 's/home/Users/' test/functional/config.ini
           fi
           test/functional/test_runner.py --combinedlogslen=4000 ${{ matrix.config.test_runner_extra }}
