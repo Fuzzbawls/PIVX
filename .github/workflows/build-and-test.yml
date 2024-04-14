@@ -616,9 +616,9 @@ jobs:
           fi
 
           if [ "${{ matrix.config.unit_tests }}" = "true" ] || [ "${{ matrix.config.functional_tests }}" = "true" ]; then
-            mkdir -p $PARAMS_DIR
-            PARAMS_FLAGS="--with-params-dir=$PARAMS_DIR"
-            ./params/install-params.sh $PARAMS_DIR
+            #mkdir -p $PARAMS_DIR
+            #PARAMS_FLAGS="--with-params-dir=$PARAMS_DIR"
+            ./params/install-params.sh #$PARAMS_DIR
           fi
 
           echo ::group::Autogen
@@ -743,7 +743,7 @@ jobs:
       - name: Install PIVX Params
         run: |
           cd build/pivx-${{ matrix.config.host }}/params/
-          ./install-params.sh $PARAMS_DIR
+          ./install-params.sh #$PARAMS_DIR
 
       - name: Run Functional Tests
         run: |
