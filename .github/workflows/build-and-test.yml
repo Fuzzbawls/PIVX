@@ -723,7 +723,7 @@ jobs:
 
     steps:
       - name: Setup Environment
-        if: ${{ matrix.config.os }} = ubuntu*
+        if: [[ ${{ matrix.config.os }} = ubuntu* ]]
         run: sudo apt-get install --no-install-recommends --no-upgrade -qq ${{ matrix.config.apt_get }}
 
       - name: Download Build Artifact
