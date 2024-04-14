@@ -666,8 +666,10 @@ jobs:
       - name: Create Tar Archive
         if: matrix.config.functional_tests == true
         run: |
-          strip build/pivx-${{ matrix.config.host }}/src/pivxd
-          strip build/pivx-${{ matrix.config.host }}/src/pivx-cli
+          if [[ ${{ matrix.config.host }} != *apple* ]]; then
+            strip build/pivx-${{ matrix.config.host }}/src/pivxd
+            strip build/pivx-${{ matrix.config.host }}/src/pivx-cli
+          fi
           tar -hcvf ${{ matrix.config.host }}-built.tar \
             build/pivx-${{ matrix.config.host }}/share/rpcauth \
             build/pivx-${{ matrix.config.host }}/test/ \
