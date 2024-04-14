@@ -723,7 +723,7 @@ jobs:
 
     steps:
       - name: Setup Environment
-        if: matrix.config.host != x86_64-apple-darwin16
+        if: matrix.config.host != 'x86_64-apple-darwin16'
         run: sudo apt-get install --no-install-recommends --no-upgrade -qq ${{ matrix.config.apt_get }}
 
       - name: Download Build Artifact
