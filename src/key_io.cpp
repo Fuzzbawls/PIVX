@@ -22,7 +22,7 @@ namespace
         const CChainParams::Base58Type m_addrType;
 
     public:
-        DestinationEncoder(const CChainParams& params, const CChainParams::Base58Type _addrType = CChainParams::PUBKEY_ADDRESS) : m_params(params), m_addrType(_addrType) {}
+        explicit DestinationEncoder(const CChainParams& params, const CChainParams::Base58Type _addrType = CChainParams::PUBKEY_ADDRESS) : m_params(params), m_addrType(_addrType) {}
 
         std::string operator()(const CKeyID& id) const
         {

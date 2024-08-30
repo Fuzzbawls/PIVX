@@ -96,7 +96,7 @@ public:
 
 public:
     CDKGComplaint() {}
-    CDKGComplaint(const Consensus::LLMQParams& params);
+    explicit CDKGComplaint(const Consensus::LLMQParams& params);
 
     SERIALIZE_METHODS(CDKGComplaint, obj)
     {
@@ -164,7 +164,7 @@ public:
 
 public:
     CDKGPrematureCommitment() {}
-    CDKGPrematureCommitment(const Consensus::LLMQParams& params);
+    explicit CDKGPrematureCommitment(const Consensus::LLMQParams& params);
 
     int CountValidMembers() const
     {

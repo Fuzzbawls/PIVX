@@ -80,7 +80,7 @@ class CoinSpend
 public:
 
     CoinSpend() {};
-    CoinSpend(CDataStream& strm) { strm >> *this; }
+    explicit CoinSpend(CDataStream& strm) { strm >> *this; }
     virtual ~CoinSpend(){};
 
     const CBigNum& getCoinSerialNumber() const { return this->coinSerialNumber; }

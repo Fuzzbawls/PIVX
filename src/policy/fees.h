@@ -200,7 +200,7 @@ class CBlockPolicyEstimator
 {
 public:
     /** Create new BlockPolicyEstimator and initialize stats tracking classes with default values */
-    CBlockPolicyEstimator(const CFeeRate& minRelayFee);
+    explicit CBlockPolicyEstimator(const CFeeRate& minRelayFee);
 
     /** Process all the transactions that have been included in a block */
     void processBlock(unsigned int nBlockHeight,

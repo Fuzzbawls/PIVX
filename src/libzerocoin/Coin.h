@@ -29,7 +29,7 @@ namespace libzerocoin
     class InvalidSerialException : public std::exception {
     public:
         std::string message;
-        InvalidSerialException(const std::string &message) : message(message) {}
+        explicit InvalidSerialException(const std::string &message) : message(message) {}
     };
 
     int ExtractVersionFromSerial(const CBigNum& bnSerial);
@@ -53,7 +53,7 @@ public:
         strm >> *this;
     }
 
-    PublicCoin(const ZerocoinParams* p);
+    explicit PublicCoin(const ZerocoinParams* p);
 
     /**Generates a public coin
      *

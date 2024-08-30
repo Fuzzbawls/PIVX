@@ -24,7 +24,7 @@ static const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
 class ScriptPubKeyMan {
 
 public:
-    ScriptPubKeyMan(CWallet* parent) : wallet(parent) {}
+    explicit ScriptPubKeyMan(CWallet* parent) : wallet(parent) {}
     ~ScriptPubKeyMan() {};
 
     /* Set the HD chain model (chain child index counters) */

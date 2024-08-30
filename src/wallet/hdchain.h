@@ -37,7 +37,7 @@ public:
     // Chain counter type
     uint8_t chainType{HDChain::ChainCounterType::Standard};
 
-    CHDChain(const uint8_t& _chainType = HDChain::ChainCounterType::Standard) : chainType(_chainType) { SetNull(); }
+    explicit CHDChain(const uint8_t& _chainType = HDChain::ChainCounterType::Standard) : chainType(_chainType) { SetNull(); }
 
     SERIALIZE_METHODS(CHDChain, obj)
     {

@@ -17,7 +17,7 @@ public:
     uint256 hash;
     bool found;
     CValidationState state;
-    BlockStateCatcher(const uint256& hashIn) : hash(hashIn), found(false), state(){};
+    explicit BlockStateCatcher(const uint256& hashIn) : hash(hashIn), found(false), state(){};
     void setBlockHash(const uint256& _hash) { clear(); hash = _hash; }
     void clear() { hash.SetNull(); found = false; state = CValidationState(); }
     bool stateErrorFound() { return found && state.IsError(); }

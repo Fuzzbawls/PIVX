@@ -204,7 +204,7 @@ public:
     std::vector<unsigned char> GetAddrBytes() const;
     int GetReachabilityFrom(const CNetAddr* paddrPartner = nullptr) const;
 
-    CNetAddr(const struct in6_addr& pipv6Addr, const uint32_t scope = 0);
+    explicit CNetAddr(const struct in6_addr& pipv6Addr, const uint32_t scope = 0);
     bool GetIn6Addr(struct in6_addr* pipv6Addr) const;
 
     friend bool operator==(const CNetAddr& a, const CNetAddr& b);
@@ -489,7 +489,7 @@ public:
     CService();
     CService(const CNetAddr& ip, uint16_t port);
     CService(const struct in_addr& ipv4Addr, uint16_t port);
-    CService(const struct sockaddr_in& addr);
+    explicit CService(const struct sockaddr_in& addr);
     uint16_t GetPort() const;
     bool GetSockAddr(struct sockaddr* paddr, socklen_t* addrlen) const;
     bool SetSockAddr(const struct sockaddr* paddr);
@@ -502,7 +502,7 @@ public:
     std::string ToStringIPPort() const;
 
     CService(const struct in6_addr& ipv6Addr, uint16_t port);
-    CService(const struct sockaddr_in6& addr);
+    explicit CService(const struct sockaddr_in6& addr);
 
     SERIALIZE_METHODS(CService, obj)
     {

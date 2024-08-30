@@ -15,7 +15,7 @@ class PFBorderImage : public QFrame
     Q_OBJECT
 
 public:
-    PFBorderImage(QWidget *parent = nullptr) : QFrame(parent) {};
+    explicit PFBorderImage(QWidget *parent = nullptr) : QFrame(parent) {};
     ~PFBorderImage() {};
 
 #if defined(Q_OS_MAC)

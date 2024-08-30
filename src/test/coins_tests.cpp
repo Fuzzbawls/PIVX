@@ -191,7 +191,7 @@ public:
 class CCoinsViewCacheTest : public CCoinsViewCache
 {
 public:
-    CCoinsViewCacheTest(CCoinsView* base) : CCoinsViewCache(base) {}
+    explicit CCoinsViewCacheTest(CCoinsView* base) : CCoinsViewCache(base) {}
 
     void SelfTest() const
     {

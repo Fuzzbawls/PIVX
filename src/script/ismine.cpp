@@ -54,7 +54,7 @@ namespace
     private:
         const CKeyStore& keystore;
     public:
-        CWDestinationVisitor(const CKeyStore& _keystore) : keystore(_keystore) {}
+        explicit CWDestinationVisitor(const CKeyStore& _keystore) : keystore(_keystore) {}
 
         isminetype operator()(const CTxDestination& dest) const {
             return ::IsMine(keystore, dest);

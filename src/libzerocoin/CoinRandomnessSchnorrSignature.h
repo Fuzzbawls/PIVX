@@ -19,7 +19,7 @@ namespace libzerocoin {
 class CoinRandomnessSchnorrSignature {
 public:
     CoinRandomnessSchnorrSignature() {};
-    template <typename Stream> CoinRandomnessSchnorrSignature(Stream& strm) {strm >> *this;}
+    template <typename Stream> explicit CoinRandomnessSchnorrSignature(Stream& strm) {strm >> *this;}
 
     /** Creates a Schnorr signature object using the randomness of a public coin as private key sk.
      *

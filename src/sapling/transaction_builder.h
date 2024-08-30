@@ -71,8 +71,8 @@ private:
     Optional<std::string> maybeError;
 public:
     TransactionBuilderResult() = delete;
-    TransactionBuilderResult(const CTransaction& tx);
-    TransactionBuilderResult(const std::string& error);
+    explicit TransactionBuilderResult(const CTransaction& tx);
+    explicit TransactionBuilderResult(const std::string& error);
     bool IsTx();
     bool IsError();
     CTransaction GetTxOrThrow();
@@ -96,7 +96,7 @@ private:
     Optional<CTxDestination> tChangeAddr;
 
 public:
-    TransactionBuilder(
+    explicit TransactionBuilder(
         const Consensus::Params& consensusParams,
         CKeyStore* keyStore = nullptr);
 

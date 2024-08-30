@@ -34,7 +34,7 @@ namespace {
     /** Set the working directory for the duration of the scope. */
     class PushCurrentDirectory {
     public:
-        PushCurrentDirectory(const std::string &new_cwd)
+        explicit PushCurrentDirectory(const std::string &new_cwd)
                 : old_cwd(fs::current_path()) {
             fs::current_path(new_cwd);
         }

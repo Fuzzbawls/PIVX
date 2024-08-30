@@ -28,7 +28,7 @@ protected:
     size_type nMaxSize;
 
 public:
-    limitedmap(size_type nMaxSizeIn = 0) { nMaxSize = nMaxSizeIn; }
+    explicit limitedmap(size_type nMaxSizeIn = 0) { nMaxSize = nMaxSizeIn; }
     const_iterator begin() const { return map.begin(); }
     const_iterator end() const { return map.end(); }
     size_type size() const { return map.size(); }

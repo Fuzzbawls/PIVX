@@ -45,7 +45,7 @@ class SaplingNoteData
 public:
 
     SaplingNoteData() : nullifier() { }
-    SaplingNoteData(const libzcash::SaplingIncomingViewingKey& _ivk) : ivk {_ivk}, nullifier() { }
+    explicit SaplingNoteData(const libzcash::SaplingIncomingViewingKey& _ivk) : ivk {_ivk}, nullifier() { }
     SaplingNoteData(const libzcash::SaplingIncomingViewingKey& _ivk, const uint256& n) : ivk {_ivk}, nullifier(n) { }
 
     /* witnesses/ivk: only for own (received) outputs */
@@ -147,7 +147,7 @@ typedef std::map<SaplingOutPoint, SaplingNoteData> mapSaplingNoteData_t;
 class SaplingScriptPubKeyMan {
 
 public:
-    SaplingScriptPubKeyMan(CWallet *parent) : wallet(parent) {}
+    explicit SaplingScriptPubKeyMan(CWallet *parent) : wallet(parent) {}
 
     ~SaplingScriptPubKeyMan() {};
 

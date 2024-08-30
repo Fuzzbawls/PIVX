@@ -12,7 +12,7 @@
 class CSporkDB : public CDBWrapper
 {
 public:
-    CSporkDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+    explicit CSporkDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 
 private:
     CSporkDB(const CSporkDB&);

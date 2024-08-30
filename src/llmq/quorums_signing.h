@@ -91,7 +91,7 @@ private:
     std::unordered_map<uint256, std::pair<bool, int64_t>> hasSigForSessionCache;
 
 public:
-    CRecoveredSigsDb(bool fMemory);
+    explicit CRecoveredSigsDb(bool fMemory);
 
     bool HasRecoveredSig(Consensus::LLMQType llmqType, const uint256& id, const uint256& msgHash);
     bool HasRecoveredSigForId(Consensus::LLMQType llmqType, const uint256& id);
@@ -146,7 +146,7 @@ private:
     std::vector<CRecoveredSigsListener*> recoveredSigsListeners;
 
 public:
-    CSigningManager(bool fMemory);
+    explicit CSigningManager(bool fMemory);
 
     bool AlreadyHave(const CInv& inv);
     bool GetRecoveredSigForGetData(const uint256& hash, CRecoveredSig& ret);

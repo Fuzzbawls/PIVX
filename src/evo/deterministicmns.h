@@ -184,7 +184,7 @@ private:
 
 public:
     CDeterministicMN() = delete; // no default constructor, must specify internalId
-    CDeterministicMN(uint64_t _internalId) : internalId(_internalId)
+    explicit CDeterministicMN(uint64_t _internalId) : internalId(_internalId)
     {
         // only non-initial values
         assert(_internalId != std::numeric_limits<uint64_t>::max());

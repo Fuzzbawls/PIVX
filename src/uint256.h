@@ -116,7 +116,7 @@ public:
 class blob88 : public base_blob<88> {
 public:
     blob88() {}
-    blob88(const base_blob<88>& b) : base_blob<88>(b) {}
+    explicit blob88(const base_blob<88>& b) : base_blob<88>(b) {}
     explicit blob88(const std::vector<unsigned char>& vch) : base_blob<88>(vch) {}
 };
 
@@ -184,7 +184,7 @@ const uint256 UINT256_MAX = uint256S("ffffffffffffffffffffffffffffffffffffffffff
 class uint512 : public base_blob<512> {
 public:
     uint512() {}
-    uint512(const base_blob<512>& b) : base_blob<512>(b) {}
+    explicit uint512(const base_blob<512>& b) : base_blob<512>(b) {}
     explicit uint512(const std::vector<unsigned char>& vch) : base_blob<512>(vch) {}
 };
 

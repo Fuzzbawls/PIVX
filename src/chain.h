@@ -205,7 +205,7 @@ public:
     unsigned int nTimeMax{0};
 
     CBlockIndex() {}
-    CBlockIndex(const CBlock& block);
+    explicit CBlockIndex(const CBlock& block);
 
     std::string ToString() const;
 

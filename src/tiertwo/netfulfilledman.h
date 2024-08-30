@@ -40,7 +40,7 @@ private:
     int64_t lastFilterCleanup{0};
 
 public:
-    CNetFulfilledRequestManager(unsigned int itemsFilterSize);
+    explicit CNetFulfilledRequestManager(unsigned int itemsFilterSize);
 
     SERIALIZE_METHODS(CNetFulfilledRequestManager, obj) {
         LOCK(obj.cs_mapFulfilledRequests);

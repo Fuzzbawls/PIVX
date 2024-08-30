@@ -63,7 +63,7 @@ class ConstPubkeyProvider final : public PubkeyProvider
     CPubKey m_pubkey;
 
 public:
-    ConstPubkeyProvider(const CPubKey& pubkey) : m_pubkey(pubkey) {}
+    explicit ConstPubkeyProvider(const CPubKey& pubkey) : m_pubkey(pubkey) {}
     bool GetPubKey(int pos, const SigningProvider& arg, CPubKey& out) const override
     {
         out = m_pubkey;
@@ -170,7 +170,7 @@ class AddressDescriptor final : public Descriptor
     CTxDestination m_destination;
 
 public:
-    AddressDescriptor(CTxDestination destination) : m_destination(std::move(destination)) {}
+    explicit AddressDescriptor(CTxDestination destination) : m_destination(std::move(destination)) {}
 
     bool IsRange() const override { return false; }
     std::string ToString() const override { return "addr(" + EncodeDestination(m_destination) + ")"; }
@@ -188,7 +188,7 @@ class RawDescriptor final : public Descriptor
     CScript m_script;
 
 public:
-    RawDescriptor(CScript script) : m_script(std::move(script)) {}
+    explicit RawDescriptor(CScript script) : m_script(std::move(script)) {}
 
     bool IsRange() const override { return false; }
     std::string ToString() const override { return "raw(" + HexStr(m_script) + ")"; }
@@ -328,7 +328,7 @@ class ComboDescriptor final : public Descriptor
     std::unique_ptr<PubkeyProvider> m_provider;
 
 public:
-    ComboDescriptor(std::unique_ptr<PubkeyProvider> provider) : m_provider(std::move(provider)) {}
+    explicit ComboDescriptor(std::unique_ptr<PubkeyProvider> provider) : m_provider(std::move(provider)) {}
 
     bool IsRange() const override { return m_provider->IsRange(); }
     std::string ToString() const override { return "combo(" + m_provider->ToString() + ")"; }

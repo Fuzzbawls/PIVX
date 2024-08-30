@@ -74,7 +74,8 @@ public:
     {
         SetNull();
     }
-    CKeyMetadata(int64_t nCreateTime_)
+
+    explicit CKeyMetadata(int64_t nCreateTime_)
     {
         SetNull();
         nCreateTime = nCreateTime_;

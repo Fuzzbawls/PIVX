@@ -62,7 +62,7 @@ struct SendManyRecipient
     {}
 
     // Transparent recipient: OP_RETURN
-    SendManyRecipient(const uint256& message):
+    explicit SendManyRecipient(const uint256& message):
             recipient(new CRecipient(GetScriptForOpReturn(message), 0, false))
     {}
 };

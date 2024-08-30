@@ -23,7 +23,7 @@ struct WalletTestingSetupBase : public SaplingTestingSetup
 
 struct WalletTestingSetup : public WalletTestingSetupBase
 {
-    WalletTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
+    explicit WalletTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
 };
 
 struct WalletRegTestingSetup : public WalletTestingSetup

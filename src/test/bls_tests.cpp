@@ -70,7 +70,7 @@ struct Member
     CBLSSecretKey sk;
     CBLSPublicKey pk;
 
-    Member(const CBLSId& _id): id(_id)
+    explicit Member(const CBLSId& _id): id(_id)
     {
         sk.MakeNewKey();
         pk = sk.GetPublicKey();

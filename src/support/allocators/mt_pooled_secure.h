@@ -26,7 +26,7 @@ struct mt_pooled_secure_allocator : public std::allocator<T> {
     typedef typename base::reference reference;
     typedef typename base::const_reference const_reference;
     typedef typename base::value_type value_type;
-    mt_pooled_secure_allocator(size_type nrequested_size = 32,
+    explicit mt_pooled_secure_allocator(size_type nrequested_size = 32,
                                size_type nnext_size = 32,
                                size_type nmax_size = 0) throw()
     {

@@ -71,7 +71,7 @@ void PWidget::emitMessage(const QString& title, const QString& body, unsigned in
 class WorkerTask : public QRunnable
 {
 public:
-    WorkerTask(QPointer<Worker> worker) {
+    explicit WorkerTask(QPointer<Worker> worker) {
         this->worker = worker;
     }
 

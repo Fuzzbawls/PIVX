@@ -37,7 +37,7 @@ private:
     CConnman* connman;
 
 public:
-    PeerLogicValidation(CConnman* connman);
+    explicit PeerLogicValidation(CConnman* connman);
     ~PeerLogicValidation() = default;
 
     void BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindex) override;

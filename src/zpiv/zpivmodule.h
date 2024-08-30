@@ -24,7 +24,7 @@ static int const PUBSPEND_SCHNORR = 4;
 class PublicCoinSpend : public libzerocoin::CoinSpend {
 public:
 
-    PublicCoinSpend(libzerocoin::ZerocoinParams* params): pubCoin(params) {};
+    explicit PublicCoinSpend(libzerocoin::ZerocoinParams* params): pubCoin(params) {};
     template <typename Stream> PublicCoinSpend(libzerocoin::ZerocoinParams* params, Stream& strm);
 
     ~PublicCoinSpend(){};

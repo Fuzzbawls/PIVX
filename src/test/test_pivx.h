@@ -51,7 +51,7 @@ static inline std::vector<unsigned char> InsecureRandBytes(size_t len) { return 
 struct BasicTestingSetup {
     ECCVerifyHandle globalVerifyHandle;
 
-    BasicTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
+    explicit BasicTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~BasicTestingSetup();
 
     fs::path SetDataDir(const std::string& name);
@@ -75,7 +75,7 @@ struct TestingSetup: public BasicTestingSetup
     CScheduler scheduler;
     std::unique_ptr<PeerLogicValidation> peerLogic;
 
-    TestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
+    explicit TestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~TestingSetup();
 };
 
@@ -99,7 +99,7 @@ class CScript;
 // Test chain only available on regtest
 struct TestChainSetup : public TestingSetup
 {
-    TestChainSetup(int blockCount);
+    explicit TestChainSetup(int blockCount);
     ~TestChainSetup();
 
     // Create a new block with coinbase paying to scriptPubKey, and try to add it to the current chain.

@@ -849,7 +849,7 @@ private:
     static EmptyMerkleRoots<Depth, Hash> emptyroots;
 public:
     PathFiller() : queue() { }
-    PathFiller(std::deque<Hash> queue) : queue(queue) { }
+    explicit PathFiller(std::deque<Hash> queue) : queue(queue) { }
 
     Hash next(size_t depth) {
         if (queue.size() > 0) {

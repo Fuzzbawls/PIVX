@@ -24,7 +24,7 @@ protected:
     uint64_t value_{0};
 public:
     BaseNote() {}
-    BaseNote(uint64_t value) : value_(value) {};
+    explicit BaseNote(uint64_t value) : value_(value) {};
     virtual ~BaseNote() {};
 
     inline uint64_t value() const { return value_; };

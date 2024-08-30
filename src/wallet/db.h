@@ -46,7 +46,7 @@ public:
     std::unordered_map<std::string, WalletDatabaseFileId> m_fileids;
     std::condition_variable_any m_db_in_use;
 
-    BerkeleyEnvironment(const fs::path& env_directory);
+    explicit BerkeleyEnvironment(const fs::path& env_directory);
     ~BerkeleyEnvironment();
     void Reset();
 
@@ -111,7 +111,7 @@ public:
     }
 
     /** Create DB handle to real database */
-    BerkeleyDatabase(const fs::path& wallet_path, bool mock = false) :
+    explicit BerkeleyDatabase(const fs::path& wallet_path, bool mock = false) :
         nUpdateCounter(0), nLastSeen(0), nLastFlushed(0), nLastWalletUpdate(0)
     {
         env = GetWalletEnv(wallet_path, strFile);

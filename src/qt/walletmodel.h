@@ -192,7 +192,7 @@ public:
     // Return status record for SendCoins, contains error id + information
     struct SendCoinsReturn {
         SendCoinsReturn(StatusCode status = OK) : status(status) {}
-        SendCoinsReturn(CWallet::CommitResult _commitRes) : commitRes(_commitRes)
+        explicit SendCoinsReturn(CWallet::CommitResult _commitRes) : commitRes(_commitRes)
         {
             status = (_commitRes.status == CWallet::CommitStatus::OK ? OK : TransactionCommitFailed);
         }

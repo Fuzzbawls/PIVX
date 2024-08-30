@@ -23,7 +23,7 @@ private:
     const CChainParams& m_params;
 
 public:
-    PaymentAddressEncoder(const CChainParams& params) : m_params(params) {}
+    explicit PaymentAddressEncoder(const CChainParams& params) : m_params(params) {}
 
     std::string operator()(const libzcash::SaplingPaymentAddress& zaddr) const
     {
@@ -47,7 +47,7 @@ private:
     const CChainParams& m_params;
 
 public:
-    ViewingKeyEncoder(const CChainParams& params) : m_params(params) {}
+    explicit ViewingKeyEncoder(const CChainParams& params) : m_params(params) {}
 
     std::string operator()(const libzcash::SaplingExtendedFullViewingKey& extfvk) const
     {
@@ -74,7 +74,7 @@ private:
     const CChainParams& m_params;
 
 public:
-    SpendingKeyEncoder(const CChainParams& params) : m_params(params) {}
+    explicit SpendingKeyEncoder(const CChainParams& params) : m_params(params) {}
 
     std::string operator()(const libzcash::SaplingExtendedSpendingKey& zkey) const
     {

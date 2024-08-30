@@ -41,7 +41,7 @@ class ShutdownWindow : public QWidget
     Q_OBJECT
 
 public:
-    ShutdownWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::Widget);
+    explicit ShutdownWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::Widget);
     static void showShutdownWindow(QMainWindow* window);
 
 protected:

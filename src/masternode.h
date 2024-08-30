@@ -244,7 +244,7 @@ class CMasternodeBroadcast : public CMasternode
 public:
     CMasternodeBroadcast();
     CMasternodeBroadcast(CService newAddr, CTxIn newVin, CPubKey newPubkey, CPubKey newPubkey2, int protocolVersionIn, const CMasternodePing& _lastPing);
-    CMasternodeBroadcast(const CMasternode& mn);
+    explicit CMasternodeBroadcast(const CMasternode& mn);
 
     bool CheckAndUpdate(int& nDoS);
 

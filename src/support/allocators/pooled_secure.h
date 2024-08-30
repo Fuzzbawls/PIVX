@@ -29,7 +29,7 @@ struct pooled_secure_allocator : public std::allocator<T> {
     typedef typename base::reference reference;
     typedef typename base::const_reference const_reference;
     typedef typename base::value_type value_type;
-    pooled_secure_allocator(const size_type nrequested_size = 32,
+    explicit pooled_secure_allocator(const size_type nrequested_size = 32,
                             const size_type nnext_size = 32,
                             const size_type nmax_size = 0) throw() :
                             pool(nrequested_size, nnext_size, nmax_size){}

@@ -52,7 +52,7 @@ public:
 class SaplingIncomingViewingKey : public uint256 {
 public:
     SaplingIncomingViewingKey() : uint256() { }
-    SaplingIncomingViewingKey(uint256 ivk) : uint256(ivk) { }
+    explicit SaplingIncomingViewingKey(uint256 ivk) : uint256(ivk) { }
 
     // Can pass in diversifier for Sapling addr
     Optional<SaplingPaymentAddress> address(diversifier_t d) const;
@@ -113,7 +113,7 @@ public:
 class SaplingSpendingKey : public uint256 {
 public:
     SaplingSpendingKey() : uint256() { }
-    SaplingSpendingKey(uint256 sk) : uint256(sk) { }
+    explicit SaplingSpendingKey(uint256 sk) : uint256(sk) { }
 
     static SaplingSpendingKey random();
 

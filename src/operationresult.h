@@ -36,8 +36,8 @@ private:
     Optional<T> m_obj_res{nullopt};
 public:
     CallResult() : OperationResult(false) {}
-    CallResult(T _obj) : OperationResult(true), m_obj_res(_obj) { }
-    CallResult(const std::string& error) : OperationResult(false, error) { }
+    explicit CallResult(T _obj) : OperationResult(true), m_obj_res(_obj) { }
+    explicit CallResult(const std::string& error) : OperationResult(false, error) { }
     const Optional<T>& getObjResult() const { return m_obj_res; }
 };
 

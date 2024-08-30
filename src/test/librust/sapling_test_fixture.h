@@ -12,7 +12,7 @@
  */
 struct SaplingTestingSetup : public TestingSetup
 {
-    SaplingTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
+    explicit SaplingTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~SaplingTestingSetup();
 };
 

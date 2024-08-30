@@ -1261,7 +1261,7 @@ protected:
     CPubKey vchPubKey;
 
 public:
-    CReserveKey(CWallet* pwalletIn)
+    explicit CReserveKey(CWallet* pwalletIn)
     {
         nIndex = -1;
         pwallet = pwalletIn;
