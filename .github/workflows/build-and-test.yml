@@ -72,6 +72,64 @@ jobs:
             test/lint/commit-script-check.sh $COMMIT_RANGE
           fi
 
+  # Extended lint using cppcheck. Other jobs do NOT require this to pass.
+  extended-lint:
+    env:
+      CPPCHECK_VERSION: 2.14.0
+      CPPCHECK_BIN_DIR: ${{ github.workspace }}/.cppcheck
+      CPPCHECK_BUILD_DIR: ${{ github.workspace }}/.ci-cppcheck
+      LC_ALL: C
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: cppcheck cache files
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cppcheck
+            .ci-cppcheck
+          key: ci-cppcheck
+          restore-keys: ci-cppcheck
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+          mkdir -p ${CPPCHECK_BIN_DIR}
+          curl -s https://codeload.github.com/danmar/cppcheck/tar.gz/${CPPCHECK_VERSION} | tar -zxf - --directory ${CPPCHECK_BIN_DIR}/
+          cd ${CPPCHECK_BIN_DIR}/cppcheck-${CPPCHECK_VERSION}/
+          make -j 3 MATCHCOMPILER=yes FILESDIR=${CPPCHECK_BIN_DIR}/cppcheck-${CPPCHECK_VERSION}/cfg/
+
+      - name: Set TRAVIS_BRANCH workaround env variable
+        if: github.event_name == 'pull_request'
+        run: echo "TRAVIS_BRANCH=${{ github.base_ref }}" >> $GITHUB_ENV
+
+      - name: Build cppcheck cache
+        run: |
+          export PATH="${CPPCHECK_BIN_DIR}/cppcheck-${CPPCHECK_VERSION}:${PATH}"
+          git checkout -qf -B master refs/remotes/origin/master
+          git checkout -qf $GITHUB_SHA
+
+          # Build or rebuild the cppcheck cache.
+          test/lint/cppcheck/lint-all.sh --setup
+
+      - name: Lint
+        run: |
+          # Run the remainder of lint tests in `test/lint/`.
+          test/lint/cppcheck/lint-all.sh
+
   # CMake build jobs to ensure building with CMake remains viable.
   # Currently this only supports native linux and macOS.
   cmake:
