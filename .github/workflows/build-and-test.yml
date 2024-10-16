@@ -383,7 +383,7 @@ jobs:
 
           - name: x64-Linux-latest
             id: Linux-x86_64-nodepends-latest-tests
-            os: ubuntu-latest
+            os: ubuntu-22.04
             python-version: '3.8'
             packages: python3-zmq libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev libqrencode-dev libgmp-dev libsodium-dev
 
