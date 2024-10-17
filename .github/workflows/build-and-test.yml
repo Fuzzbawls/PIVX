@@ -106,12 +106,12 @@ jobs:
             cxx: g++
 
           - name: macOS
-            os: macos-12
-            python-version: '3.8'
-            packages: llvm@13 autoconf automake berkeley-db@4 libtool boost miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium
+            os: macos-13
+            python-version: '3.10'
+            packages: llvm@14 autoconf automake berkeley-db@4 libtool boost miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium
             boost_root: true
-            cc: $(brew --prefix llvm@13)/bin/clang
-            cxx: $(brew --prefix llvm@13)/bin/clang++
+            cc: $(brew --prefix llvm@14)/bin/clang
+            cxx: $(brew --prefix llvm@14)/bin/clang++
 
           - name: macOS-latest
             os: macos-14
@@ -226,11 +226,12 @@ jobs:
 
           - name: x64-macOS
             id: macOS-nodepends
-            os: macos-12
-            python-version: '3.8'
+            os: macos-13
+            python-version: '3.10'
             packages: autoconf automake ccache berkeley-db@4 libtool boost miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium librsvg
             unit_tests: true
             functional_tests: true
+            goal: deploy
             cc: clang
             cxx: clang++
             BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug --with-boost=/usr/local/opt/boost"
@@ -294,11 +295,6 @@ jobs:
             CXX=${{ matrix.config.cxx }}
             export CC
             export CXX
-          fi
-
-          if [ "${{ matrix.config.os }}" = "macos-12" ]; then
-            export CPPFLAGS="-I/usr/local/opt/boost/include -I/usr/local/opt/berkeley-db@4/include"
-            export LDFLAGS="-L/usr/local/opt/boost/lib -L/usr/local/opt/berkeley-db@4/lib"
           fi
 
           if [[ ${{ matrix.config.os }} = ubuntu* ]]; then
@@ -389,8 +385,8 @@ jobs:
 
           - name: x64-macOS
             id: macOS-nodepends
-            os: macos-12
-            python-version: '3.8'
+            os: macos-13
+            python-version: '3.10'
             packages: berkeley-db@4 boost miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
 
           - name: arm64-macOS-latest
