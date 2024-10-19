@@ -20,7 +20,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-        Miniupnpc DEFAULT_MSG
+        Miniupnp DEFAULT_MSG
         MINIUPNP_INCLUDE_DIR
         MINIUPNP_LIBRARY
 )
@@ -31,11 +31,11 @@ if(MINIUPNP_FOUND)
         set(MINIUPNPC_API_VERSION "${CMAKE_MATCH_1}")
         if (${MINIUPNPC_API_VERSION} GREATER "10" OR ${MINIUPNPC_API_VERSION} EQUAL "10")
             if(NOT Miniupnp_FIND_QUIETLY)
-                message(STATUS "Found Miniupnpc API version " ${MINIUPNPC_API_VERSION})
+                message(STATUS "Found Miniupnp API version " ${MINIUPNPC_API_VERSION})
             endif()
             set(MINIUPNP_FOUND true)
         else()
-            message(FATAL_ERROR "Unsupported Miniupnpc version!")
+            message(FATAL_ERROR "Unsupported Miniupnp version!")
         endif()
     endif()
 else()
