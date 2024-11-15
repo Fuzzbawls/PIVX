@@ -14,8 +14,6 @@ class CEvoDB;
 namespace llmq
 {
 
-extern CDBWrapper* llmqDb;
-
 // Init/destroy LLMQ globals
 void InitLLMQSystem(CEvoDB& evoDb, CScheduler* scheduler, bool unitTests);
 void DestroyLLMQSystem();

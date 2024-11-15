@@ -15,6 +15,7 @@
 #include "quorums_commitment.h"
 #include "quorums_dkgsessionmgr.h"
 #include "shutdown.h"
+#include "tiertwo/tiertwo_sync_state.h"
 #include "univalue.h"
 #include "validation.h"
 
@@ -165,7 +166,7 @@ CQuorumManager::CQuorumManager(CEvoDB& _evoDb, CBLSWorker& _blsWorker, CDKGSessi
 
 void CQuorumManager::UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDownload)
 {
-    if (fInitialDownload || !activeMasternodeManager || !deterministicMNManager->IsDIP3Enforced(pindexNew->nHeight)) {
+    if (!g_tiertwo_sync_state.IsBlockchainSynced() || !activeMasternodeManager) {
         return;
     }
 

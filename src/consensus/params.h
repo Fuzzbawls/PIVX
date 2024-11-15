@@ -278,7 +278,7 @@ struct Params {
     // LLMQ
     std::map<LLMQType, LLMQParams> llmqs;
     Optional<LLMQParams> GetLLMQParams(uint8_t llmqtype) const;
-    LLMQType llmqChainLocks;
+    LLMQType llmqTypeChainLocks;
 };
 } // namespace Consensus
 

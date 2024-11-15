@@ -25,7 +25,7 @@ void EvoNotificationInterface::AcceptedBlockHeader(const CBlockIndex* pindexNew)
 void EvoNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
     // background thread updates
-    llmq::chainLocksHandler->UpdatedBlockTip(pindexNew, pindexFork);
+    llmq::chainLocksHandler->UpdatedBlockTip(pindexNew);
     llmq::quorumDKGSessionManager->UpdatedBlockTip(pindexNew, fInitialDownload);
     llmq::quorumManager->UpdatedBlockTip(pindexNew, fInitialDownload);
 }

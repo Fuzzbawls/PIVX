@@ -26,34 +26,20 @@ public:
     uint256 quorumHash;
     uint256 id;
     uint256 msgHash;
-    CBLSSignature sig;
+    CBLSLazySignature sig;
 
     // only in-memory
     uint256 hash;
 
 public:
-    template <typename Stream>
-    inline void Serialize(Stream& s) const
+    SERIALIZE_METHODS(CRecoveredSig, obj)
     {
-        s << llmqType;
-        s << quorumHash;
-        s << id;
-        s << msgHash;
-        s << sig;
-    }
-    template <typename Stream>
-    inline void Unserialize(Stream& s, bool checkMalleable = true, bool updateHash = true, bool skipSig = false)
-    {
-        s >> llmqType;
-        s >> quorumHash;
-        s >> id;
-        s >> msgHash;
-        if (!skipSig) {
-            sig.Unserialize(s, checkMalleable);
-            if (updateHash) {
-                UpdateHash();
-            }
-        }
+        READWRITE(obj.llmqType);
+        READWRITE(obj.quorumHash);
+        READWRITE(obj.id);
+        READWRITE(obj.msgHash);
+        READWRITE(obj.sig);
+        SER_READ(obj, obj.UpdateHash());
     }
 
     void UpdateHash()
@@ -81,6 +67,9 @@ private:
 public:
     CRecoveredSigsDb(CDBWrapper& _db);
 
+    void ConvertInvalidTimeKeys();
+    void AddVoteTimeKeys();
+
     bool HasRecoveredSig(Consensus::LLMQType llmqType, const uint256& id, const uint256& msgHash);
     bool HasRecoveredSigForId(Consensus::LLMQType llmqType, const uint256& id);
     bool HasRecoveredSigForSession(const uint256& signHash);
@@ -88,6 +77,7 @@ public:
     bool GetRecoveredSigByHash(const uint256& hash, CRecoveredSig& ret);
     bool GetRecoveredSigById(Consensus::LLMQType llmqType, const uint256& id, CRecoveredSig& ret);
     void WriteRecoveredSig(const CRecoveredSig& recSig);
+    void RemoveRecoveredSig(Consensus::LLMQType llmqType, const uint256& id);
 
     void CleanupOldRecoveredSigs(int64_t maxAge);
 
@@ -96,8 +86,11 @@ public:
     bool GetVoteForId(Consensus::LLMQType llmqType, const uint256& id, uint256& msgHashRet);
     void WriteVoteForId(Consensus::LLMQType llmqType, const uint256& id, const uint256& msgHash);
 
+    void CleanupOldVotes(int64_t maxAge);
+
 private:
     bool ReadRecoveredSig(Consensus::LLMQType llmqType, const uint256& id, CRecoveredSig& ret);
+    void RemoveRecoveredSig(CDBBatch& batch, Consensus::LLMQType llmqType, const uint256& id, bool deleteTimeKey);
 };
 
 class CRecoveredSigsListener
@@ -141,6 +134,10 @@ public:
 
     void ProcessMessage(CNode* pnode, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
+    // This is called when a recovered signature can be safely removed from the DB. This is only safe when some other
+    // mechanism prevents possible conflicts. As an example, ChainLocks prevent conflicts in confirmed TXs InstantSend votes
+    void RemoveRecoveredSig(Consensus::LLMQType llmqType, const uint256& id);
+
 private:
     void ProcessMessageRecoveredSig(CNode* pfrom, const CRecoveredSig& recoveredSig, CConnman& connman);
     bool PreVerifyRecoveredSig(NodeId nodeId, const CRecoveredSig& recoveredSig, bool& retBan);
@@ -163,6 +160,8 @@ public:
     bool IsConflicting(Consensus::LLMQType llmqType, const uint256& id, const uint256& msgHash);
     bool HasVotedOnId(Consensus::LLMQType llmqType, const uint256& id);
     bool GetVoteForId(Consensus::LLMQType llmqType, const uint256& id, uint256& msgHashRet);
+
+    std::vector<CQuorumCPtr> GetActiveQuorumSet(Consensus::LLMQType llmqType, int signHeight);
     CQuorumCPtr SelectQuorumForSigning(Consensus::LLMQType llmqType, int signHeight, const uint256& selectionHash);
     // Verifies a recovered sig that was signed while the chain tip was at signedAtTip
     bool VerifyRecoveredSig(Consensus::LLMQType llmqType, int signedAtHeight, const uint256& id, const uint256& msgHash, const CBLSSignature& sig);

@@ -13,6 +13,7 @@
 #include "scheduler.h"
 #include "spork.h"
 #include "sporkid.h"
+#include "tiertwo/tiertwo_sync_state.h"
 #include "validation.h"
 
 namespace llmq
@@ -108,7 +109,7 @@ void CChainLocksHandler::ProcessNewChainLock(NodeId from, const llmq::CChainLock
 
     uint256 requestId = ::SerializeHash(std::make_pair(CLSIG_REQUESTID_PREFIX, clsig.nHeight));
     uint256 msgHash = clsig.blockHash;
-    if (!quorumSigningManager->VerifyRecoveredSig(Params().GetConsensus().llmqChainLocks, clsig.nHeight, requestId, msgHash, clsig.sig)) {
+    if (!quorumSigningManager->VerifyRecoveredSig(Params().GetConsensus().llmqTypeChainLocks, clsig.nHeight, requestId, msgHash, clsig.sig)) {
         LogPrintf("CChainLocksHandler::%s -- invalid CLSIG (%s), peer=%d\n", __func__, clsig.ToString(), from);
         if (from != -1) {
             LOCK(cs_main);
@@ -184,7 +185,7 @@ void CChainLocksHandler::AcceptedBlockHeader(const CBlockIndex* pindexNew)
     }
 }
 
-void CChainLocksHandler::UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork)
+void CChainLocksHandler::UpdatedBlockTip(const CBlockIndex* pindexNew)
 {
     // don't call TrySignChainTip directly but instead let the scheduler call it. This way we ensure that cs_main is
     // never locked and TrySignChainTip is not called twice in parallel. Also avoids recursive calls due to
@@ -207,15 +208,20 @@ void CChainLocksHandler::TrySignChainTip()
 {
     Cleanup();
 
+    if (!fMasterNode) {
+        return;
+    }
+
+    if (!g_tiertwo_sync_state.IsBlockchainSynced()) {
+        return;
+    }
+
     const CBlockIndex* pindex;
     {
         LOCK(cs_main);
         pindex = chainActive.Tip();
     }
 
-    if (!fMasterNode) {
-        return;
-    }
     if (!pindex->pprev) {
         return;
     }
@@ -264,7 +270,7 @@ void CChainLocksHandler::TrySignChainTip()
         lastSignedMsgHash = msgHash;
     }
 
-    quorumSigningManager->AsyncSignIfMember(Params().GetConsensus().llmqChainLocks, requestId, msgHash);
+    quorumSigningManager->AsyncSignIfMember(Params().GetConsensus().llmqTypeChainLocks, requestId, msgHash);
 }
 
 // WARNING: cs_main and cs should not be held!
@@ -345,7 +351,7 @@ void CChainLocksHandler::HandleNewRecoveredSig(const llmq::CRecoveredSig& recove
 
         clsig.nHeight = lastSignedHeight;
         clsig.blockHash = lastSignedMsgHash;
-        clsig.sig = recoveredSig.sig;
+        clsig.sig = recoveredSig.sig.Get();
     }
     ProcessNewChainLock(-1, clsig, ::SerializeHash(clsig));
 }
@@ -440,6 +446,10 @@ bool CChainLocksHandler::InternalHasConflictingChainLock(int nHeight, const uint
 
 void CChainLocksHandler::Cleanup()
 {
+    if (!g_tiertwo_sync_state.IsBlockchainSynced()) {
+        return;
+    }
+
     {
         LOCK(cs);
         if (GetTimeMillis() - lastCleanupTime < CLEANUP_INTERVAL) {

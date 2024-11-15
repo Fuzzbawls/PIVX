@@ -74,7 +74,7 @@ public:
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
     void ProcessNewChainLock(NodeId from, const CChainLockSig& clsig, const uint256& hash);
     void AcceptedBlockHeader(const CBlockIndex* pindexNew);
-    void UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork);
+    void UpdatedBlockTip(const CBlockIndex* pindexNew);
     void TrySignChainTip();
     void EnforceBestChainLock();
     virtual void HandleNewRecoveredSig(const CRecoveredSig& recoveredSig);

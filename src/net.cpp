@@ -1295,6 +1295,15 @@ bool CConnman::GenerateSelectSet(std::set<SOCKET>& recv_set, std::set<SOCKET>& s
         }
     }
 
+#ifdef USE_WAKEUP_PIPE
+    // We add a pipe to the read set so that the select() call can be woken up from the outside
+    // This is done when data is added to send buffers (vSendMsg) or when new peers are added
+    // This is currently only implemented for POSIX compliant systems. This means that Windows will fall back to
+    // timing out after 50ms and then trying to send. This is ok as we assume that heavy-load daemons are usually
+    // run on Linux and friends.
+    recv_set.insert(wakeupPipe[0]);
+#endif
+
     return !recv_set.empty() || !send_set.empty() || !error_set.empty();
 }
 
@@ -1330,7 +1339,12 @@ void CConnman::SocketEvents(std::set<SOCKET>& recv_set, std::set<SOCKET>& send_s
         vpollfds.push_back(std::move(it.second));
     }
 
-    if (poll(vpollfds.data(), vpollfds.size(), SELECT_TIMEOUT_MILLISECONDS) < 0) return;
+    wakeupSelectNeeded = true;
+    int r = poll(vpollfds.data(), vpollfds.size(), SELECT_TIMEOUT_MILLISECONDS);
+    wakeupSelectNeeded = false;
+    if (r < 0) {
+        return;
+    }
 
     if (interruptNet) return;
 
@@ -1379,7 +1393,9 @@ void CConnman::SocketEvents(std::set<SOCKET> &recv_set, std::set<SOCKET> &send_s
         hSocketMax = std::max(hSocketMax, hSocket);
     }
 
+    wakeupSelectNeeded = true;
     int nSelect = select(hSocketMax + 1, &fdsetRecv, &fdsetSend, &fdsetError, &timeout);
+    wakeupSelectNeeded = false;
 
     if (interruptNet)
         return;
@@ -1419,6 +1435,20 @@ void CConnman::SocketHandler()
 {
     std::set<SOCKET> recv_set, send_set, error_set;
     SocketEvents(recv_set, send_set, error_set);
+
+#ifdef USE_WAKEUP_PIPE
+    // drain the wakeup pipe
+    if (recv_set.count(wakeupPipe[0])) {
+        LogPrint(BCLog::NET, "woke up select()\n");
+        char buf[128];
+        while (true) {
+            int r = read(wakeupPipe[0], buf, sizeof(buf));
+            if (r <= 0) {
+                break;
+            }
+        }
+    }
+#endif
 
     if (interruptNet) return;
 
@@ -1534,6 +1564,23 @@ void CConnman::WakeMessageHandler()
     condMsgProc.notify_one();
 }
 
+void CConnman::WakeSelect()
+{
+#ifdef USE_WAKEUP_PIPE
+    if (wakeupPipe[1] == -1) {
+        return;
+    }
+
+    LogPrint(BCLog::NET, "waking up select()\n");
+
+    char buf[1];
+    if (write(wakeupPipe[1], buf, 1) != 1) {
+        LogPrint(BCLog::NET, "write to wakeupPipe failed\n");
+    }
+#endif
+
+    wakeupSelectNeeded = false;
+}
 
 static std::string GetDNSHost(const CDNSSeedData& data, ServiceFlags* requiredServiceBits)
 {
@@ -2242,6 +2289,22 @@ bool CConnman::Start(CScheduler& scheduler, const Options& connOptions)
         fMsgProcWake = false;
     }
 
+#ifdef USE_WAKEUP_PIPE
+    if (pipe(wakeupPipe) != 0) {
+        wakeupPipe[0] = wakeupPipe[1] = -1;
+        LogPrint(BCLog::NET, "pipe() for wakeupPipe failed\n");
+    } else {
+        int fFlags = fcntl(wakeupPipe[0], F_GETFL, 0);
+        if (fcntl(wakeupPipe[0], F_SETFL, fFlags | O_NONBLOCK) == -1) {
+            LogPrint(BCLog::NET, "fcntl for O_NONBLOCK on wakeupPipe failed\n");
+        }
+        fFlags = fcntl(wakeupPipe[1], F_GETFL, 0);
+        if (fcntl(wakeupPipe[1], F_SETFL, fFlags | O_NONBLOCK) == -1) {
+            LogPrint(BCLog::NET, "fcntl for O_NONBLOCK on wakeupPipe failed\n");
+        }
+    }
+#endif
+
     // Send and receive from sockets, accept connections
     threadSocketHandler = std::thread(&TraceThread<std::function<void()> >, "net", std::function<void()>(std::bind(&CConnman::ThreadSocketHandler, this)));
 
@@ -2371,6 +2434,11 @@ void CConnman::Stop()
     vhListenSocket.clear();
     semOutbound.reset();
     semAddnode.reset();
+#ifdef USE_WAKEUP_PIPE
+    if (wakeupPipe[0] != -1) close(wakeupPipe[0]);
+    if (wakeupPipe[1] != -1) close(wakeupPipe[1]);
+    wakeupPipe[0] = wakeupPipe[1] = -1;
+#endif
 }
 
 void CConnman::DeleteNode(CNode* pnode)
@@ -2683,7 +2751,7 @@ bool CConnman::NodeFullyConnected(const CNode* pnode)
     return pnode && pnode->fSuccessfullyConnected && !pnode->fDisconnect;
 }
 
-void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg)
+void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg, bool allowOptimisticSend)
 {
     size_t nMessageSize = msg.data.size();
     size_t nTotalSize = nMessageSize + CMessageHeader::HEADER_SIZE;
@@ -2700,7 +2768,8 @@ void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg)
     size_t nBytesSent = 0;
     {
         LOCK(pnode->cs_vSend);
-        bool optimisticSend(pnode->vSendMsg.empty());
+        bool hasPendingData = !pnode->vSendMsg.empty();
+        bool optimisticSend(allowOptimisticSend && pnode->vSendMsg.empty());
 
         //log total amount of bytes per command
         pnode->mapSendBytesPerMsgCmd[msg.command] += nTotalSize;
@@ -2715,6 +2784,9 @@ void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg)
         // If write queue empty, attempt "optimistic write"
         if (optimisticSend == true)
             nBytesSent = SocketSendData(pnode);
+        // wake up select() call in case there was no pending data before (so it was not selecting this socket for sending)
+        else if (!hasPendingData && wakeupSelectNeeded)
+            WakeSelect();
     }
     if (nBytesSent)
         RecordBytesSent(nBytesSent);
