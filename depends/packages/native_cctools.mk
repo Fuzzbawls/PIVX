@@ -76,7 +76,7 @@ define $(package)_set_vars
 endef
 
 define $(package)_preprocess_cmds
-  sed -i.old "s/VERSION 3.4.3/VERSION 3.5/" $($(package)_extract_dir)/libtapi/src/llvm/CMakeLists.txt \
+  sed -i.old "s/VERSION 3.4.3/VERSION 3.5/" $($(package)_extract_dir)/libtapi/src/llvm/CMakeLists.txt && \
   CC=$($(package)_cc) CXX=$($(package)_cxx) INSTALLPREFIX=$($(package)_extract_dir) ./libtapi/build.sh && \
   CC=$($(package)_cc) CXX=$($(package)_cxx) INSTALLPREFIX=$($(package)_extract_dir) ./libtapi/install.sh && \
   sed -i.old "/define HAVE_PTHREADS/d" $($(package)_build_subdir)/ld64/src/ld/InputFiles.h
