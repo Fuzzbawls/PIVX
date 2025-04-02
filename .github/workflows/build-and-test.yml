@@ -235,7 +235,7 @@ jobs:
           export CXX
           export PYTHON
           mkdir -p ${{ github.workspace }}/cmake-build-debug && cd ${{ github.workspace }}/cmake-build-debug
-          cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" ${{ github.workspace }}
+          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -G "Unix Makefiles" ${{ github.workspace }}
 
       - name: Build CMake Wallet
         run: |
