@@ -1176,7 +1176,7 @@ if test x$use_pkgconfig = xyes; then
           AC_CHECK_HEADER([gmp.h], [
             AC_CHECK_LIB([gmp], [__gmpz_init], [LIBS="$LIBS -lgmp"], [AC_MSG_ERROR([libgmp missing])])
           ], [AC_MSG_ERROR([libgmp headers missing])])
-        ], [AC_MSG_ERROR([libgmp not found.])])
+        ])
       fi
 
       if test "x$use_zmq" = "xyes"; then
