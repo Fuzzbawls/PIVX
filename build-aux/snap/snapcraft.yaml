@@ -106,9 +106,9 @@ parts:
       - fcitx-frontend-qt5
 
   pivx-core:
-    source: https://github.com/PIVX-Project/PIVX
+    source: https://github.com/Fuzzbawls/PIVX
     source-type: git
-    source-tag: master
+    source-tag: snapcraft-test
     plugin: nil
     override-build: |
       echo "+++++++++++++++++++++++++++++++++++++++++++++++"
