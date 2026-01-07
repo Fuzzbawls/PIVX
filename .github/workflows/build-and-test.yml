@@ -215,7 +215,7 @@ jobs:
           restore-keys: ${{ runner.os }}-cmake-${{ matrix.config.name }}-ccache
 
       - name: Set Xcode Version
-        if: matrix.config.os == 'macos-14'
+        if: matrix.config.os == 'macos-15*'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '15.0.1'
@@ -345,7 +345,7 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ matrix.config.id }}-native-ccache
 
       - name: Set Xcode Version
-        if: matrix.config.os == 'macos-14'
+        if: matrix.config.os == 'macos-15*'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '15.0.1'
