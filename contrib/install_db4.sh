@@ -54,7 +54,7 @@ sha256_check() {
     # sha256sum exists on FreeBSD, but takes different arguments than the GNU version
     sha256 -c "${1}" "${2}"
   elif [ "$(uname)" = "Darwin" ]; then
-    echo "${1} ${2}" | shasum -a 256 -c
+    echo "${1}  ${2}" | shasum -a 256 -c
   elif check_exists sha256sum; then
     echo "${1} ${2}" | sha256sum -c
   elif check_exists sha256; then
