@@ -7,7 +7,7 @@ export LC_ALL=C
 set -e
 
 # Set C_FLAG for Mac OS version > 11.0.0
-
+# shellcheck disable=SC2039,SC2004
 if [[ "$OSTYPE" == "darwin"* ]]; then
   os_ver_str=$(sw_vers -productVersion)
   os_ver=${os_ver_str//.}
