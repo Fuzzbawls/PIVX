@@ -19,12 +19,12 @@ jobs:
         shell: bash
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.8'
 
@@ -85,17 +85,17 @@ jobs:
         shell: bash
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.8'
 
       - name: cppcheck cache files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .cppcheck
@@ -181,10 +181,10 @@ jobs:
 
     steps:
       - name: Get Source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.config.python-version }}
 
@@ -208,7 +208,7 @@ jobs:
           cmake-version: '3.31.6'
 
       - name: ccache cache files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .ccache
           key: ${{ runner.os }}-cmake-${{ matrix.config.name }}-ccache
@@ -315,10 +315,10 @@ jobs:
 
     steps:
       - name: Get Source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.config.python-version }}
 
@@ -338,7 +338,7 @@ jobs:
           sudo ./contrib/install_db4.sh /usr/local true
 
       - name: ccache cache files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .ccache
           key: ${{ runner.os }}-${{ matrix.config.id }}-native-ccache
@@ -421,7 +421,7 @@ jobs:
 
       - name: Upload Build Artifact
         if: matrix.config.functional_tests == true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: native-${{ matrix.config.os }}-built
           path: native-${{ matrix.config.os }}-built.tar
@@ -466,7 +466,7 @@ jobs:
 
     steps:
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.config.python-version }}
 
@@ -482,7 +482,7 @@ jobs:
           pip install pyzmq
 
       - name: Download Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: native-${{ matrix.config.os }}-built
 
@@ -550,10 +550,10 @@ jobs:
 
     steps:
       - name: Get Source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.8'
 
@@ -568,7 +568,7 @@ jobs:
           cmake-version: '3.31.6'
 
       - name: depends cache files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             depends/built
@@ -685,10 +685,10 @@ jobs:
 
     steps:
       - name: Get Source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.8'
 
@@ -699,7 +699,7 @@ jobs:
 
       - name: depends cache files
         if: matrix.config.no_depends != 1
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             depends/built
@@ -709,7 +709,7 @@ jobs:
           restore-keys: ${{ runner.os }}-depends-${{ matrix.config.host }}-v2
 
       - name: ccache cache files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .ccache
           key: ${{ runner.os }}-depbuild-${{ matrix.config.id }}-ccache
@@ -809,7 +809,7 @@ jobs:
 
       - name: Upload Build Artifact
         if: matrix.config.functional_tests == true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.config.host }}-built
           path: ${{ matrix.config.host }}-built.tar
@@ -853,7 +853,7 @@ jobs:
 
     steps:
       - name: Initialize Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.8'
 
@@ -871,7 +871,7 @@ jobs:
           pip install pyzmq
 
       - name: Download Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ matrix.config.host }}-built
 
