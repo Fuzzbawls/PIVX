@@ -18,5 +18,5 @@ command -v autoreconf >/dev/null || \
 if autoreconf --replace-handwritten; then
   autoreconf --verbose --replace-handwritten --install --force --warnings=all
 else
-  autoreconf --verbose --install --force --warnings=all
+  autoreconf --verbose --replace-handwritten --install --force --warnings=all
 fi
