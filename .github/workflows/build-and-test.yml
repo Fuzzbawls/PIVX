@@ -456,13 +456,13 @@ jobs:
             id: macOS-nodepends
             os: macos-15-intel
             python-version: '3.10'
-            packages: boost miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
+            packages: boost@1.85 miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
 
           - name: arm64-macOS-latest
             id: macOS-nodepends-latest
             os: macos-15
             python-version: '3.12'
-            packages: boost miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
+            packages: boost@1.85 miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
 
     steps:
       - name: Initialize Python
