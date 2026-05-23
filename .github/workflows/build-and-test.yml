@@ -365,6 +365,15 @@ jobs:
             export CC
             export CXX
           fi
+          
+          if [[ ${{ matrix.config.name }} = x64-macOS ]]; then
+            BOOSTROOT=/usr/local/opt/boost
+            export BOOSTROOT
+          fi
+          if [[ ${{ matrix.config.name }} = arm64-macOS-latest ]]; then
+            BOOSTROOT=/opt/homebrew/opt/boost
+            export BOOSTROOT
+          fi
 
           if [[ ${{ matrix.config.os }} = ubuntu* ]]; then
             OUTDIR_PATH="$GITHUB_WORKSPACE/$GITHUB_RUN_NUMBER"
