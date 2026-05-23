@@ -5,6 +5,9 @@
 
 export LC_ALL=C
 set -e
+
+echo -e "/* src/src/chiabls/contrib/relic/include/relic_conf.h.in  Generated from configure.ac by autoheader.  */\n$(cat src/chiabls/contrib/relic/include/relic_conf.h.in)" > src/chiabls/contrib/relic/include/relic_conf.h.in
+
 srcdir="$(dirname $0)"
 cd "$srcdir"
 if [ -z ${LIBTOOLIZE} ] && GLIBTOOLIZE="$(command -v glibtoolize)"; then
@@ -13,4 +16,4 @@ if [ -z ${LIBTOOLIZE} ] && GLIBTOOLIZE="$(command -v glibtoolize)"; then
 fi
 command -v autoreconf >/dev/null || \
   (echo "configuration failed, please install autoconf first" && exit 1)
-autoreconf --install --force --warnings=all
+autoreconf --verbose --install --force --warnings=all
