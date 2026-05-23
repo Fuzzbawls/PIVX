@@ -365,7 +365,7 @@ jobs:
             export CC
             export CXX
           fi
-          
+
           if [[ ${{ matrix.config.name }} = x64-macOS ]]; then
             BOOSTROOT=/usr/local/opt/boost
             export BOOSTROOT
