@@ -365,9 +365,9 @@ jobs:
             export CC
             export CXX
 
-          export BOOST_ROOT=$(brew --prefix boost)
-          export BOOST_INCLUDEDIR=$BOOST_ROOT/include
-          export BOOST_LIBRARYDIR=$BOOST_ROOT/lib
+            export BOOST_ROOT=$(brew --prefix boost)
+            export BOOST_INCLUDEDIR=$BOOST_ROOT/include
+            export BOOST_LIBRARYDIR=$BOOST_ROOT/lib
           fi
 
           if [[ ${{ matrix.config.os }} = ubuntu* ]]; then
