@@ -15,8 +15,10 @@ fi
 command -v autoreconf >/dev/null || \
   (echo "configuration failed, please install autoconf first" && exit 1)
 
-if autoreconf --replace-handwritten; then
+if autoreconf --help | grep -q -- "--replace-handwritten"; then
+  echo "--replace-handwritten supported"
   autoreconf --verbose --replace-handwritten --install --force --warnings=all
 else
-  autoreconf --verbose --replace-handwritten --install --force --warnings=all
+  echo "--replace-handwritten NOT supported"
+  autoreconf --verbose --install --force --warnings=all
 fi
