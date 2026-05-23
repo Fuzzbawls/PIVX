@@ -15,8 +15,8 @@ fi
 command -v autoreconf >/dev/null || \
   (echo "configuration failed, please install autoconf first" && exit 1)
 
-if autoreconf -R; then
-  autoreconf --verbose -R --install --force --warnings=all
+if autoreconf --replace-handwritten; then
+  autoreconf --verbose --replace-handwritten --install --force --warnings=all
 else
   autoreconf --verbose --install --force --warnings=all
 fi
