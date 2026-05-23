@@ -299,7 +299,7 @@ jobs:
             goal: deploy
             cc: clang
             cxx: clang++
-            BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug --with-boost=/usr/local/opt/boost"
+            BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug"
 
           - name: arm64-macOS-latest
             id: macOS-nodepends-latest
@@ -311,7 +311,7 @@ jobs:
             goal: deploy
             cc: clang
             cxx: clang++
-            BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug --with-boost=/opt/homebrew/opt/boost"
+            BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug"
 
     steps:
       - name: Get Source
