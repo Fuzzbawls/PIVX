@@ -846,7 +846,7 @@ jobs:
 
           - name: x86_64 macOS [Full Functional Tests]
             id: macos-x86_64-tests
-            os: macos-15
+            os: macos-15-intel
             host: x86_64-apple-darwin16
             packages: None
             test_runner_extra: "--all --exclude feature_dbcrash"
