@@ -293,7 +293,7 @@ jobs:
             id: macOS-nodepends
             os: macos-15-intel
             python-version: '3.10'
-            packages: autoconf automake ccache libtool boost@1.85 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium librsvg
+            packages: autoconf automake ccache libtool boost@1.85 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium librsvg brotli
             unit_tests: true
             functional_tests: true
             goal: deploy
@@ -305,7 +305,7 @@ jobs:
             id: macOS-nodepends-latest
             os: macos-15
             python-version: '3.12'
-            packages: autoconf automake ccache libtool boost@1.85 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium librsvg
+            packages: autoconf automake ccache libtool boost@1.85 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium librsvg brotli
             unit_tests: true
             functional_tests: true
             goal: deploy
