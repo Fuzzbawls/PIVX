@@ -170,6 +170,7 @@ jobs:
             boost_root: true
             cc: clang
             cxx: clang++
+            xcode: '16.0.0'
 
           - name: macOS-latest
             os: macos-15
@@ -178,6 +179,16 @@ jobs:
             boost_root: true
             cc: clang
             cxx: clang++
+            xcode: '16.0.0'
+
+          - name: macOS-future
+            os: macos-26
+            python-version: '3.12'
+            packages: autoconf automake libtool boost@1.85 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium
+            boost_root: true
+            cc: clang
+            cxx: clang++
+            xcode: '26.0.1'
 
     steps:
       - name: Get Source
@@ -215,10 +226,10 @@ jobs:
           restore-keys: ${{ runner.os }}-cmake-${{ matrix.config.name }}-ccache
 
       - name: Set Xcode Version
-        if: matrix.config.os == 'macos-15'
+        if: ${{ matrix.config.os == 'macos-15' || matrix.config.os == 'macos-26' }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.0.0'
+          xcode-version: ${{ matrix.config.xcode }}
 
       - name: Configure CMake Wallet
         run: |
@@ -299,6 +310,7 @@ jobs:
             goal: deploy
             cc: clang
             cxx: clang++
+            xcode: '16.0.0'
             BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug"
 
           - name: arm64-macOS-latest
@@ -311,6 +323,20 @@ jobs:
             goal: deploy
             cc: clang
             cxx: clang++
+            xcode: '16.0.0'
+            BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug"
+
+          - name: arm64-macOS-future
+            id: macOS-nodepends-future
+            os: macos-26
+            python-version: '3.12'
+            packages: autoconf automake ccache libtool boost@1.85 miniupnpc libnatpmp pkg-config qt@5 zmq libevent qrencode gmp libsodium librsvg
+            unit_tests: true
+            functional_tests: true
+            goal: deploy
+            cc: clang
+            cxx: clang++
+            xcode: '26.0.1'
             BITCOIN_CONFIG: "--enable-zmq --enable-gui --enable-reduce-exports --enable-werror --enable-debug"
 
     steps:
@@ -349,10 +375,10 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ matrix.config.id }}-native-ccache
 
       - name: Set Xcode Version
-        if: matrix.config.os == 'macos-15'
+        if: ${{ matrix.config.os == 'macos-15' || matrix.config.os == 'macos-26' }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.0.0'
+          xcode-version: ${{ matrix.config.xcode }}
 
       - name: Configure Native Wallet
         run: |
@@ -465,6 +491,12 @@ jobs:
           - name: arm64-macOS-latest
             id: macOS-nodepends-latest
             os: macos-15
+            python-version: '3.12'
+            packages: boost@1.85 miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
+
+          - name: arm64-macOS-future
+            id: macOS-nodepends-future
+            os: macos-26
             python-version: '3.12'
             packages: boost@1.85 miniupnpc libnatpmp pkg-config zmq libevent qrencode gmp libsodium
 
